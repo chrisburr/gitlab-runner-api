@@ -17,7 +17,7 @@ before_script:
     paths:
      - '.coverage.${envname}'
   script:
-    - ${PYTHON_EXECUTABLE} -m tox -e ${envname}
+    - python3.6 -m tox -e ${envname}
 
 test:py27:
   <<: *testing_definition
