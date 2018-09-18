@@ -1,0 +1,47 @@
+stages:
+- testing
+- coverage
+
+image: centos:7
+
+before_script:
+  - yum -y install https://centos7.iuscommunity.org/ius-release.rpm
+  - yum -y install python36u
+  - yum -y install pypy
+  - python3.6 -m ensurepip
+  - python3.6 -m pip install --user tox
+
+.testing_template: &testing_definition
+  stage: testing
+  artifacts:
+    paths:
+     - '.coverage.${envname}'
+  script:
+    - ${PYTHON_EXECUTABLE} -m tox -e ${envname}
+
+test:py27:
+  <<: *testing_definition
+  variables:
+    envname: py27
+    PYTHON_EXECUTABLE: python2.7
+
+test:py36:
+  <<: *testing_definition
+  variables:
+    envname: py36
+    PYTHON_EXECUTABLE: python3.6
+
+test:pypy:
+  <<: *testing_definition
+  variables:
+    envname: pypy
+    PYTHON_EXECUTABLE: pypy
+
+coverage:
+  stage: coverage
+  dependencies:
+    - test:py27
+    - test:py36
+    - test:pypy
+  script:
+    - python3.6 -m tox -e cov-report
