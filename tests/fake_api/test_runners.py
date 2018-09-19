@@ -28,7 +28,7 @@ def test_register_invalid_token(gitlab_api):
 def test_register_valid(gitlab_api):
     response = requests.post(API_ENDPOINT+'/runners/', {'token': gitlab_api.token})
     # Check the response
-    assert response.status_code == 200, response.json()
+    assert response.status_code == 201, response.json()
     data = response.json()
     assert 'id' in data
     assert 'token' in data

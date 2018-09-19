@@ -29,7 +29,7 @@ def test_none_available(gitlab_api):
     runner_token = list(gitlab_api.runners.keys())[0]
     response = requests.post(API_ENDPOINT+'/jobs/request', {'token': runner_token})
     # Check the response
-    assert response.status_code == 200
+    assert response.status_code == 204
     data = response.json()
     assert data == {}
     # Check the API's internal state
@@ -44,7 +44,7 @@ def test_request_job(gitlab_api):
     runner_token = list(gitlab_api.runners.keys())[0]
     response = requests.post(API_ENDPOINT+'/jobs/request', {'token': runner_token})
     # Check the response
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     # TODO: Validate schema
     assert data['job_info']['name'] == expected_job['name']

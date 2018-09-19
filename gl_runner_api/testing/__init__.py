@@ -23,12 +23,12 @@ __all__ = [
 
 class FakeGitlabAPI(object):
     def __init__(self, n_runners=0, n_pending=0, n_running=0, n_success=0, n_failed=0, n_with_artifacts=0):
-        self.n_runners = 0
-        self.n_pending = 0
-        self.n_running = 0
-        self.n_success = 0
-        self.n_failed = 0
-        self.n_with_artifacts = 0
+        self.n_runners = n_runners
+        self.n_pending = n_pending
+        self.n_running = n_running
+        self.n_success = n_success
+        self.n_failed = n_failed
+        self.n_with_artifacts = n_with_artifacts
 
         self._next_runner_id = 0
         self._next_job_id = 0
@@ -156,7 +156,7 @@ class FakeGitlabAPI(object):
             'id': runner.id,
             'token': token,
         }
-        return (200, headers, json.dumps(response))
+        return (201, headers, json.dumps(response))
 
     def _verify_runner_callback(self, request):
         payload, response = check_token(request, list(self._runners.keys()))
@@ -173,13 +173,13 @@ class FakeGitlabAPI(object):
             return response
 
         if len(self.pending_jobs) == 0:
-            return (200, {}, json.dumps({}))
+            return (204, {}, json.dumps({}))
 
         job = Job(self.next_job_id, self.pending_jobs.pop(0), self)
 
         headers = {}
         response = job.as_dict()
-        return (200, headers, json.dumps(response))
+        return (201, headers, json.dumps(response))
 
 
 test_log = '\n'.join([random_string(string.printable, 100) for i in range(10000)])

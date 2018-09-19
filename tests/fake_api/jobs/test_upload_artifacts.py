@@ -26,7 +26,7 @@ def test_valid(gitlab_api, artifact_fn, artifact_hash):
         )
 
     # Check the response
-    assert response.status_code == 200
+    assert response.status_code == 201
     # TODO: Validate schema
     assert response.json() == job.as_dict()
     # Check the API's internal state
@@ -56,7 +56,7 @@ def test_valid_custom_expiry(gitlab_api, artifact_fn, artifact_hash):
         )
 
     # Check the response
-    assert response.status_code == 200
+    assert response.status_code == 201
     # TODO: Validate schema
     assert response.json() == job.as_dict()
     # Check the API's internal state
@@ -180,7 +180,7 @@ def test_already_uploaded(gitlab_api, artifact_fn, artifact_hash):
             API_ENDPOINT+'/jobs/'+job.id+'/artifacts',
             data, headers=headers, files=files
         )
-    assert response.status_code == 200
+    assert response.status_code == 201
 
     with open(artifact_fn, 'rb') as fp:
         headers = {'JOB-TOKEN': job.token}

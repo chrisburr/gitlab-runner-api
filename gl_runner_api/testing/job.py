@@ -172,7 +172,6 @@ class Job(object):
         content_range = request.headers['Content-Range'].split('-')
 
         try:
-            print(content_range, len(self.log), len(request.body))
             if len(content_range) != 2:
                 raise ValueError()
             content_start = int(content_range[0])
@@ -240,7 +239,7 @@ class Job(object):
 
         headers = {}
         response = self.as_dict()
-        return (200, headers, json.dumps(response))
+        return (201, headers, json.dumps(response))
 
     def _download_artifacts_callback(self, request):
         if request.body:
@@ -249,17 +248,14 @@ class Job(object):
             body_match = None
         token_match = re.search(r'token=([A-Za-z0-9_-]+)&?', request.path_url)
         if body_match:
-            print('body_match is', body_match)
             recieved_token, = body_match.groups()
         elif token_match:
-            print('token_match is', token_match)
             recieved_token, = token_match.groups()
         elif 'JOB-TOKEN' in request.headers:
             recieved_token = request.headers['JOB-TOKEN']
         else:
             recieved_token = None
 
-        print('recieved_token is', recieved_token, 'and', self.token, request.path_url)
         if recieved_token != self.token:
             return (403, {}, json.dumps({'message': '403 Forbidden'}))
 
@@ -304,7 +300,7 @@ class Job(object):
                 'repo_url': 'https://gitlab-ci-token:'+self.token+'@gitlab.cern.ch/bcouturi/test-runner.git',
                 'sha': '3f8fb3903b4ddde17151bac3d9f238b02bf371d0'
             },
-            'id': self.id,
+            'id': int(self.id),
             'image': {
                 'entrypoint': None,
                 'name': 'gitlab-registry.cern.ch/lhcb-docker/python-deployment:centos7'
