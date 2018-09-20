@@ -1,13 +1,12 @@
 import os
 from os.path import join
-import sys
 
 from distutils.core import setup
 
 
 # Load the version
-sys.path.insert(0, join(os.getcwd(), 'gl_runner_api'))
-from version import version
+with open(join(os.getcwd(), 'gl_runner_api', 'version.py'), 'rt') as fp:
+    exec(fp.read())
 
 # Load the README
 with open(join('README.rst'), 'rt') as fp:
@@ -21,6 +20,6 @@ setup(
     packages=['gl_runner_api', 'gl_runner_api.testing'],
     license='LICENSE.txt',
     long_description=readme_text,
-    install_requires=['requests', 'six'],
+    install_requires=['colorlog', 'requests', 'six'],
     tests_require=['pytest', 'responses', 'requests-toolbelt'],
 )
