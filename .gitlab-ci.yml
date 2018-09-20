@@ -25,8 +25,8 @@ build_docs:
   stage: docs
   before_script:
   script:
-    - curl -X POST readthedocs.org/api/v2/webhook/gl-runner-api/48649/ \
-      -d "branches=${CI_COMMIT_REF_NAME}" \
+    - curl -X POST readthedocs.org/api/v2/webhook/gl-runner-api/48649/
+      -d "branches=${CI_COMMIT_REF_NAME}"
       -d "token=${READTHEDOCS_TOKEN}"
 
 test:py27:
