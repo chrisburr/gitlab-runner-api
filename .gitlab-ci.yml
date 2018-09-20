@@ -1,15 +1,17 @@
 stages:
+- docs
 - testing
 - coverage
 
 image: centos:7
 
-before_script:
-  - yum -y install https://centos7.iuscommunity.org/ius-release.rpm
-  - yum -y install python36u
-  - yum -y install pypy
-  - python3.6 -m ensurepip
-  - python3.6 -m pip install --user tox
+.install_template: &install_python
+  before_script:
+    - yum -y install https://centos7.iuscommunity.org/ius-release.rpm
+    - yum -y install python36u
+    - yum -y install pypy
+    - python3.6 -m ensurepip
+    - python3.6 -m pip install --user tox
 
 .testing_template: &testing_definition
   stage: testing
@@ -19,25 +21,37 @@ before_script:
   script:
     - python3.6 -m tox -e ${envname}
 
+build_docs:
+  stage: docs
+  before_script:
+  script:
+    - curl -X POST readthedocs.org/api/v2/webhook/gl-runner-api/48649/ \
+      -d "branches=${CI_COMMIT_REF_NAME}" \
+      -d "token=${READTHEDOCS_TOKEN}"
+
 test:py27:
+  <<: *install_python
   <<: *testing_definition
   variables:
     envname: py27
     PYTHON_EXECUTABLE: python2.7
 
 test:py36:
+  <<: *install_python
   <<: *testing_definition
   variables:
     envname: py36
     PYTHON_EXECUTABLE: python3.6
 
 test:pypy:
+  <<: *install_python
   <<: *testing_definition
   variables:
     envname: pypy
     PYTHON_EXECUTABLE: pypy
 
 coverage:
+  <<: *install_python
   stage: coverage
   dependencies:
     - test:py27
