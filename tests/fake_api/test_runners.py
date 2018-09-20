@@ -12,21 +12,21 @@ gitlab_api = FakeGitlabAPI()
 
 @gitlab_api.use()
 def test_register_no_token(gitlab_api):
-    response = requests.post(API_ENDPOINT+'/runners/', {})
+    response = requests.post(API_ENDPOINT+'/runners/', json={})
     assert response.status_code == 400
     assert response.json()['error'] == 'token is missing'
 
 
 @gitlab_api.use()
 def test_register_invalid_token(gitlab_api):
-    response = requests.post(API_ENDPOINT+'/runners/', {'token': 'an_invalid_token'})
+    response = requests.post(API_ENDPOINT+'/runners/', json={'token': 'an_invalid_token'})
     assert response.status_code == 403
     assert response.json()['message'] == '403 Forbidden'
 
 
 @gitlab_api.use()
 def test_register_valid(gitlab_api):
-    response = requests.post(API_ENDPOINT+'/runners/', {'token': gitlab_api.token})
+    response = requests.post(API_ENDPOINT+'/runners/', json={'token': gitlab_api.token})
     # Check the response
     assert response.status_code == 201, response.json()
     data = response.json()
@@ -39,14 +39,14 @@ def test_register_valid(gitlab_api):
 
 @gitlab_api.use(n_runners=2)
 def test_verify_no_token(gitlab_api):
-    response = requests.post(API_ENDPOINT+'/runners/verify', {})
+    response = requests.post(API_ENDPOINT+'/runners/verify', json={})
     assert response.status_code == 400
     assert response.json()['error'] == 'token is missing'
 
 
 @gitlab_api.use(n_runners=2)
 def test_verify_invalid_token(gitlab_api):
-    response = requests.post(API_ENDPOINT+'/runners/verify', {'token': 'an_invalid_token'})
+    response = requests.post(API_ENDPOINT+'/runners/verify', json={'token': 'an_invalid_token'})
     assert response.status_code == 403
     assert response.json()['message'] == '403 Forbidden'
 
@@ -55,7 +55,7 @@ def test_verify_invalid_token(gitlab_api):
 def test_verify_valid(gitlab_api):
     runner_token = list(gitlab_api.runners.keys())[0]
 
-    response = requests.post(API_ENDPOINT+'/runners/verify', {'token': runner_token})
+    response = requests.post(API_ENDPOINT+'/runners/verify', json={'token': runner_token})
     # Check the response
     assert response.status_code == 200, response.json()
     assert response.json() == 200

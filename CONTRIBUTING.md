@@ -18,17 +18,35 @@ repo_token = gitlab_api.token
 # repo_token = 'ADD_TOKEN_HERE'
 
 # Add a runner
-response = requests.post(API_ENDPOINT+'/runners/', {'token': repo_token})
+data = {
+    'token': repo_token,
+    'description': 'A description',
+    'info': {
+        'name': 'a name',
+        'version': 'a version',
+        'revision': 'a revision',
+        'platform': 'a platform',
+        'architecture': 'a architecture',
+        'executor': 'a executor',
+        'features': {},
+    },
+    'active': True,
+    'locked': False,
+    'run_untagged': True,
+    'tag_list': ['cvmfs,dirac'],
+    'maximum_timeout': 10*60*60,
+}
+response = requests.post(API_ENDPOINT+'/runners/', json=data)
 assert response.status_code == 201
 runner_id = response.json()['id']
 runner_token = response.json()['token']
 
 # Check the runner token works
-response = requests.post(API_ENDPOINT+'/runners/verify', {'token': runner_token})
+response = requests.post(API_ENDPOINT+'/runners/verify', json={'token': runner_token})
 assert response.status_code == 200
 
 # Request a job
-response = requests.post(API_ENDPOINT+'/jobs/request', {'token': runner_token})
+response = requests.post(API_ENDPOINT+'/jobs/request', json={'token': runner_token, 'info': data['info']})
 assert response.status_code == 201
 job_info = response.json()
 
@@ -58,7 +76,7 @@ fp.seek(0)
 # Upload job artifacts
 response = requests.post(
     API_ENDPOINT+'/jobs/'+str(job_info['id'])+'/artifacts',
-    {}, headers={'JOB-TOKEN': job_info['token']}, files={'file': ('artifacts.zip', fp)}
+    {'expire_in': '4 hours'}, headers={'JOB-TOKEN': job_info['token']}, files={'file': ('artifacts.zip', fp)}
 )
 assert response.status_code == 201
 
@@ -69,11 +87,12 @@ data = {
     'state': 'success',  # 'success' or 'failed'
     'failure_reason': 'script_failure',  # Ignored if state is 'success'
 }
-response = requests.put(API_ENDPOINT+'/jobs/'+str(job_info['id']), data)
+response = requests.put(API_ENDPOINT+'/jobs/'+str(job_info['id']), json=data)
 assert response.status_code == 200
 
 # Download the artifacts again (id and token should be taken from job_info['dependencies'])
-response = requests.get(API_ENDPOINT+'/jobs/'+str(job_info['id'])+'/artifacts', {'token': job_info['token']})
+response = requests.get(API_ENDPOINT+'/jobs/'+str(job_info['id'])+'/artifacts',
+                        headers={'JOB-TOKEN': job_info['token']})
 assert response.status_code == 200
 fp.seek(0)
 assert response.content == fp.read()

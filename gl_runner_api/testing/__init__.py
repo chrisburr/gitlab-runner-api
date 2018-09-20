@@ -138,9 +138,9 @@ class FakeGitlabAPI(object):
             return new_func
         return decorator
 
-    def register_runner(self):
+    def register_runner(self, **kwargs):
         token = random_string(string.hexdigits, 30)
-        runner = Runner(self.next_runner_id)
+        runner = Runner(self.next_runner_id, **kwargs)
         self._runners[token] = runner
         return token, runner
 
@@ -149,7 +149,43 @@ class FakeGitlabAPI(object):
         if response is not None:
             return response
 
-        token, runner = self.register_runner()
+        # Expand the nested dictionaries
+        kwargs = payload.copy()
+        if 'token' in payload:
+            del kwargs['token']
+        if 'info' in payload:
+            if not isinstance(payload['info'], dict):
+                return (400, {}, json.dumps({{'error': 'info is invalid'}}))
+            del kwargs['info']
+            kwargs.update(payload['info'])
+            if 'features' in payload['info']:
+                del kwargs['features']
+                raise NotImplementedError()
+
+        # Validate individual items
+        if 'tag_list' in kwargs:
+            if not isinstance(kwargs['tag_list'], str):
+                return (400, {}, json.dumps({{'error': 'tag_list is invalid'}}))
+            kwargs['tag_list'] = kwargs['tag_list'].split(',')
+        expected_types = {
+            'description': str,
+            'name': str,
+            'version': str,
+            'revision': str,
+            'platform': str,
+            'architecture': str,
+            'executor': str,
+            'active': bool,
+            'locked': bool,
+            'run_untagged': bool,
+            'maximum_timeout': int,
+        }
+        for name, expected_type in expected_types.items():
+            if name in kwargs:
+                if not isinstance(kwargs[name], expected_type):
+                    return (400, {}, json.dumps({{'error': name+' is invalid'}}))
+
+        token, runner = self.register_runner(**kwargs)
 
         headers = {}
         response = {

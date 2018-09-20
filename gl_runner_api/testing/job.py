@@ -10,7 +10,7 @@ import string
 from requests_toolbelt.multipart import decoder
 import responses
 
-from .utils import check_token, decode_body, random_string
+from .utils import check_token, random_string
 
 API_ENDPOINT = 'https://gitlab.cern.ch/api/v4'
 
@@ -131,7 +131,7 @@ class Job(object):
         self._failure_reason = new_failure_reason
 
     def _update_job_callback(self, request):
-        payload = decode_body(request.body)
+        payload = json.loads(request.body)
         if 'failure_reason' in payload and payload['failure_reason'] not in self.valid_failure_reasons:
                 return (400, {}, json.dumps({'error': 'failure_reason does not have a valid value'}))
 

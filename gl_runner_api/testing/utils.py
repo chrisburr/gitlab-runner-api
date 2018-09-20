@@ -17,22 +17,10 @@ def random_string(characters, length):
     return ''.join([random.choice(characters).lower() for i in range(length)])
 
 
-def decode_body(body):
-    if body is None:
-        return {}
-    else:
-        o = urlparse('?'+body)
-        result = {}
-        for k, v in parse_qs(o.query).items():
-            assert len(v) == 1
-            result[k] = v[0]
-        return result
-
-
 def check_token(request, valid_tokens):
     if not isinstance(valid_tokens, list):
         valid_tokens = [valid_tokens]
-    payload = decode_body(request.body)
+    payload = json.loads(request.body)
 
     if 'token' not in payload:
         return payload, (400, {}, json.dumps({'error': 'token is missing'}))

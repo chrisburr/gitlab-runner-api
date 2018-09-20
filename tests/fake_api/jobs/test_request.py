@@ -12,14 +12,14 @@ gitlab_api = FakeGitlabAPI()
 
 @gitlab_api.use(n_runners=2)
 def test_no_token(gitlab_api):
-    response = requests.post(API_ENDPOINT+'/jobs/request', {})
+    response = requests.post(API_ENDPOINT+'/jobs/request', json={})
     assert response.status_code == 400
     assert response.json()['error'] == 'token is missing'
 
 
 @gitlab_api.use(n_runners=2)
 def test_invalid_token(gitlab_api):
-    response = requests.post(API_ENDPOINT+'/jobs/request', {'token': 'an_invalid_token'})
+    response = requests.post(API_ENDPOINT+'/jobs/request', json={'token': 'an_invalid_token'})
     assert response.status_code == 403
     assert response.json()['message'] == '403 Forbidden'
 
@@ -27,7 +27,7 @@ def test_invalid_token(gitlab_api):
 @gitlab_api.use(n_runners=2)
 def test_none_available(gitlab_api):
     runner_token = list(gitlab_api.runners.keys())[0]
-    response = requests.post(API_ENDPOINT+'/jobs/request', {'token': runner_token})
+    response = requests.post(API_ENDPOINT+'/jobs/request', json={'token': runner_token})
     # Check the response
     assert response.status_code == 204
     data = response.json()
@@ -42,7 +42,7 @@ def test_none_available(gitlab_api):
 def test_request_job(gitlab_api):
     expected_job = gitlab_api.pending_jobs[0]
     runner_token = list(gitlab_api.runners.keys())[0]
-    response = requests.post(API_ENDPOINT+'/jobs/request', {'token': runner_token})
+    response = requests.post(API_ENDPOINT+'/jobs/request', json={'token': runner_token})
     # Check the response
     assert response.status_code == 201
     data = response.json()

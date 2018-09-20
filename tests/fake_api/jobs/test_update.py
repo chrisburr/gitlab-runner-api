@@ -19,7 +19,7 @@ def test_update_log_only(gitlab_api):
         'token': job.token,
         'trace': 'Initial log text',
     }
-    response = requests.put(API_ENDPOINT+'/jobs/'+job.id, data)
+    response = requests.put(API_ENDPOINT+'/jobs/'+job.id, json=data)
     # Check the response
     assert response.status_code == 200
     assert response.json() is None
@@ -30,7 +30,7 @@ def test_update_log_only(gitlab_api):
         'token': job.token,
         'trace': test_log,
     }
-    response = requests.put(API_ENDPOINT+'/jobs/'+job.id, data)
+    response = requests.put(API_ENDPOINT+'/jobs/'+job.id, json=data)
     # Check the response
     assert response.status_code == 200
     assert response.json() is None
@@ -51,7 +51,7 @@ def test_set_success(gitlab_api):
         'state': 'success',
         'failure_reason': 'script_failure',  # This should be ignored
     }
-    response = requests.put(API_ENDPOINT+'/jobs/'+job.id, data)
+    response = requests.put(API_ENDPOINT+'/jobs/'+job.id, json=data)
     # Check the response
     assert response.status_code == 200
     assert response.json() is True
@@ -74,7 +74,7 @@ def test_set_failed(gitlab_api):
         'state': 'failed',
         'failure_reason': 'script_failure',
     }
-    response = requests.put(API_ENDPOINT+'/jobs/'+expected_job.id, data)
+    response = requests.put(API_ENDPOINT+'/jobs/'+expected_job.id, json=data)
     # Check the response
     assert response.status_code == 200
     assert response.json() is True
@@ -95,7 +95,7 @@ def test_invalid_state(gitlab_api):
         'trace': test_log,
         'state': 'invalid_state',
     }
-    response = requests.put(API_ENDPOINT+'/jobs/'+expected_job.id, data)
+    response = requests.put(API_ENDPOINT+'/jobs/'+expected_job.id, json=data)
     # Check the response
     assert response.status_code == 200
     assert response.json() is None
@@ -115,7 +115,7 @@ def test_already_finished(gitlab_api):
             'state': 'success',
             'failure_reason': 'script_failure',  # This should be ignored
         }
-        response = requests.put(API_ENDPOINT+'/jobs/'+job.id, data)
+        response = requests.put(API_ENDPOINT+'/jobs/'+job.id, json=data)
         # Check the response
         assert response.status_code == 403
         assert response.json() == {'message': '403 Forbidden  - Job is not running'}
@@ -135,7 +135,7 @@ def test_auth_error(gitlab_api):
         'trace': test_log,
         'state': 'success',
     }
-    response = requests.put(API_ENDPOINT+'/jobs/'+expected_job.id, data)
+    response = requests.put(API_ENDPOINT+'/jobs/'+expected_job.id, json=data)
     # Check the response
     assert response.status_code == 400, response.json()
     assert response.json() == {'error': 'token is missing'}
@@ -146,7 +146,7 @@ def test_auth_error(gitlab_api):
         'trace': test_log,
         'state': 'success',
     }
-    response = requests.put(API_ENDPOINT+'/jobs/'+expected_job.id, data)
+    response = requests.put(API_ENDPOINT+'/jobs/'+expected_job.id, json=data)
     # Check the response
     assert response.status_code == 403, response.json()
     assert response.json() == {'message': '403 Forbidden'}
@@ -170,7 +170,7 @@ def test_invalid_failure_reason(gitlab_api):
         'state': 'success',
         'failure_reason': 'invalid_reason',
     }
-    response = requests.put(API_ENDPOINT+'/jobs/'+expected_job.id, data)
+    response = requests.put(API_ENDPOINT+'/jobs/'+expected_job.id, json=data)
     # Check the response
     assert response.status_code == 400
     assert response.json() == {'error': 'failure_reason does not have a valid value'}
@@ -182,7 +182,7 @@ def test_invalid_failure_reason(gitlab_api):
         'state': 'success',
         'failure_reason': 'invalid_reason',
     }
-    response = requests.put(API_ENDPOINT+'/jobs/'+expected_job.id, data)
+    response = requests.put(API_ENDPOINT+'/jobs/'+expected_job.id, json=data)
     # Check the response
     assert response.status_code == 400
     assert response.json() == {'error': 'failure_reason does not have a valid value'}
