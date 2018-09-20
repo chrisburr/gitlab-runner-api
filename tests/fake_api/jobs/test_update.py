@@ -50,11 +50,13 @@ def test_set_success(gitlab_api):
         'trace': test_log,
         'state': 'success',
         'failure_reason': 'script_failure',  # This should be ignored
+        'info': {'platform': 'new platform'},
     }
     response = requests.put(API_ENDPOINT+'/jobs/'+job.id, json=data)
     # Check the response
     assert response.status_code == 200
     assert response.json() is True
+    assert job._runner.platform == 'new platform'
     # Check the API's internal state
     assert len(gitlab_api.pending_jobs) == 3
     assert len(gitlab_api.running_jobs) == 3
@@ -193,3 +195,26 @@ def test_invalid_failure_reason(gitlab_api):
     assert len(gitlab_api.completed_jobs) == 0
     for j in gitlab_api.running_jobs:
         j.log = ''
+
+
+@gitlab_api.use(n_runners=2, n_pending=3, n_running=4)
+def test_invalid_info(gitlab_api):
+    job = gitlab_api.running_jobs[1]
+    data = {
+        'token': job.token,
+        'trace': test_log,
+        'state': 'success',
+        'info': [],
+    }
+    response = requests.put(API_ENDPOINT+'/jobs/'+job.id, json=data)
+    # Check the response
+    assert response.status_code == 400
+    assert response.json() == {'error': 'info is invalid'}
+    # Check the API's internal state
+    assert len(gitlab_api.pending_jobs) == 3
+    assert len(gitlab_api.running_jobs) == 4
+    assert len(gitlab_api.completed_jobs) == 0
+    assert gitlab_api.running_jobs[1].id == job.id
+    assert gitlab_api.running_jobs[1].status == 'running'
+    assert gitlab_api.running_jobs[1].log == ''
+    assert gitlab_api.running_jobs[1].failure_reason is None

@@ -6,10 +6,11 @@ import json
 import string
 
 import responses
+import six
 
 from .job import Job
 from .runner import Runner
-from .utils import check_token, random_string, run_test_with_artifact
+from .utils import check_token, random_string, run_test_with_artifact, validate_runner_info
 
 API_ENDPOINT = 'https://gitlab.cern.ch/api/v4'
 
@@ -95,20 +96,23 @@ class FakeGitlabAPI(object):
 
         # Add fake data to the API
         for i in range(self.n_runners):
-            self.register_runner()
+            _, runner = self.register_runner()
 
         for i in range(self.n_pending):
             self._jobs.append({'name': 'MyJob'+str(i)})
 
         for i in range(self.n_running):
-            Job(self.next_job_id, {'name': 'MyRunningJob'+str(i)}, self)
+            assert self.n_runners > 0
+            Job(self.next_job_id, {'name': 'MyRunningJob'+str(i)}, self, runner)
 
         for i in range(self.n_success):
-            Job(self.next_job_id, {'name': 'MyGoodJob'+str(i)}, self)
+            assert self.n_runners > 0
+            Job(self.next_job_id, {'name': 'MyGoodJob'+str(i)}, self, runner)
             self.running_jobs[-1].status = 'success'
 
         for i in range(self.n_failed):
-            Job(self.next_job_id, {'name': 'MyBadJob'+str(i)}, self)
+            assert self.n_runners > 0
+            Job(self.next_job_id, {'name': 'MyBadJob'+str(i)}, self, runner)
             self.running_jobs[-1].status = 'failed'
 
         if self.n_with_artifacts > self.n_success + self.n_failed:
@@ -154,27 +158,19 @@ class FakeGitlabAPI(object):
         if 'token' in payload:
             del kwargs['token']
         if 'info' in payload:
-            if not isinstance(payload['info'], dict):
-                return (400, {}, json.dumps({{'error': 'info is invalid'}}))
+            response = validate_runner_info(payload['info'])
+            if not isinstance(response, dict):
+                return response
             del kwargs['info']
-            kwargs.update(payload['info'])
-            if 'features' in payload['info']:
-                del kwargs['features']
-                raise NotImplementedError()
+            kwargs.update(response)
 
         # Validate individual items
         if 'tag_list' in kwargs:
-            if not isinstance(kwargs['tag_list'], str):
-                return (400, {}, json.dumps({{'error': 'tag_list is invalid'}}))
+            if not isinstance(kwargs['tag_list'], six.string_types):
+                return (400, {}, json.dumps({'error': 'tag_list is invalid'}))
             kwargs['tag_list'] = kwargs['tag_list'].split(',')
         expected_types = {
-            'description': str,
-            'name': str,
-            'version': str,
-            'revision': str,
-            'platform': str,
-            'architecture': str,
-            'executor': str,
+            'description': six.string_types,
             'active': bool,
             'locked': bool,
             'run_untagged': bool,
@@ -183,7 +179,7 @@ class FakeGitlabAPI(object):
         for name, expected_type in expected_types.items():
             if name in kwargs:
                 if not isinstance(kwargs[name], expected_type):
-                    return (400, {}, json.dumps({{'error': name+' is invalid'}}))
+                    return (400, {}, json.dumps({'error': name+' is invalid'}))
 
         token, runner = self.register_runner(**kwargs)
 
@@ -207,11 +203,18 @@ class FakeGitlabAPI(object):
         payload, response = check_token(request, list(self._runners.keys()))
         if response is not None:
             return response
+        runner = self._runners[payload['token']]
+
+        if 'info' in payload:
+            response = validate_runner_info(payload['info'])
+            if not isinstance(response, dict):
+                return response
+            runner.update(**response)
 
         if len(self.pending_jobs) == 0:
             return (204, {}, json.dumps({}))
 
-        job = Job(self.next_job_id, self.pending_jobs.pop(0), self)
+        job = Job(self.next_job_id, self.pending_jobs.pop(0), self, runner)
 
         headers = {}
         response = job.as_dict()

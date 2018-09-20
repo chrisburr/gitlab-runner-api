@@ -10,7 +10,7 @@ import string
 from requests_toolbelt.multipart import decoder
 import responses
 
-from .utils import check_token, random_string
+from .utils import check_token, random_string, validate_runner_info
 
 API_ENDPOINT = 'https://gitlab.cern.ch/api/v4'
 
@@ -43,7 +43,7 @@ class Job(object):
         'missing_dependency_failure',
     ]
 
-    def __init__(self, job_id, job_info, api):
+    def __init__(self, job_id, job_info, api, runner):
         self._id = job_id
         self._job_info = job_info
         self._token = random_string(string.ascii_letters+'_-', 20)
@@ -53,6 +53,7 @@ class Job(object):
         self._failure_reason = None
         self._file_data = None
         self._api = api
+        self._runner = runner
 
         if job_info in self._api._jobs:
             self._api._jobs.pop(self._api._jobs.index(job_info))
@@ -134,6 +135,12 @@ class Job(object):
         payload = json.loads(request.body)
         if 'failure_reason' in payload and payload['failure_reason'] not in self.valid_failure_reasons:
                 return (400, {}, json.dumps({'error': 'failure_reason does not have a valid value'}))
+
+        if 'info' in payload:
+            response = validate_runner_info(payload['info'])
+            if not isinstance(response, dict):
+                return response
+            self._runner.update(**response)
 
         payload, response = check_token(request, self.token)
         if response is not None:

@@ -21,6 +21,6 @@ setup(
     packages=['gl_runner_api', 'gl_runner_api.testing'],
     license='LICENSE.txt',
     long_description=readme_text,
-    install_requires=['requests'],
+    install_requires=['requests', 'six'],
     tests_require=['pytest', 'responses', 'requests-toolbelt'],
 )

@@ -8,13 +8,15 @@ __all__ = [
 
 
 class Runner(object):
-    def __init__(self, runner_id, description=None, active=None, locked=None,
-                 run_untagged=None, tag_list=None, maximum_timeout=None,
-                 name=None, version=None, revision=None, platform=None,
-                 architecture=None, executor=None, features=None):
+    def __init__(self, runner_id, **kwargs):
         self._id = runner_id
         self._jobs = {}
+        self.update(**kwargs)
 
+    def update(self, description=None, active=None, locked=None,
+               run_untagged=None, tag_list=None, maximum_timeout=None,
+               name=None, version=None, revision=None, platform=None,
+               architecture=None, executor=None):
         self._description = description
         self._active = active
         self._locked = locked

@@ -4,13 +4,8 @@ from __future__ import print_function
 
 import json
 import random
+import six
 import tempfile
-try:
-    # Python 3
-    from urllib.parse import urlparse, parse_qs
-except ImportError:
-    # Python 2
-    from urlparse import urlparse, parse_qs
 
 
 def random_string(characters, length):
@@ -85,3 +80,27 @@ def run_test_with_artifact(func):
             fp.flush()
             return func(*args, artifact_fn=fp.name, artifact_hash=artifact_hash, **kwargs)
     return new_func
+
+
+def validate_runner_info(runner_info):
+    if not isinstance(runner_info, dict):
+        return (400, {}, json.dumps({'error': 'info is invalid'}))
+    runner_info = runner_info.copy()
+    if 'features' in runner_info:
+        runner_info.update(runner_info.pop('features'))
+        raise NotImplementedError()
+
+    # Validate individual items
+    expected_types = {
+        'name': six.string_types,
+        'version': six.string_types,
+        'revision': six.string_types,
+        'platform': six.string_types,
+        'architecture': six.string_types,
+        'executor': six.string_types,
+    }
+    for name, expected_type in expected_types.items():
+        if name in runner_info:
+            if not isinstance(runner_info[name], expected_type):
+                return (400, {}, json.dumps({'error': name+' is invalid'}))
+    return runner_info
