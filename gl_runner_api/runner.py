@@ -14,6 +14,7 @@ import requests
 import six
 
 from .exceptions import AuthException
+from .job import Job
 from .logging import logger
 from .version import CURRENT_DATA_VERSION
 
@@ -56,6 +57,10 @@ class Runner(object):
             The runner's architecture
         executor : :obj:`str`, optional
             The runner's executor
+
+        Returns
+        -------
+        :py:class:`Runner <gl_runner_api.Runner>`
         """
         if not isinstance(token, six.string_types):
             raise ValueError('token must a string')
@@ -144,6 +149,10 @@ class Runner(object):
         ----------
         filename : :obj:`str`
             Path to file that represents the runner to initialise.
+
+        Returns
+        -------
+        :py:class:`Runner <gl_runner_api.Runner>`
         """
         with open(filename, 'rt') as fp:
             return cls.loads(fp.read())
@@ -156,6 +165,10 @@ class Runner(object):
         ----------
         data : :obj:`str`
             String representing the runner to initialise
+
+        Returns
+        -------
+        :py:class:`Runner <gl_runner_api.Runner>`
         """
         data = json.loads(data)
         version, data = data[0], data[1:]
@@ -183,7 +196,7 @@ class Runner(object):
             raise NotImplementedError('Unrecognised status code from request', request, request.content)
 
     def dump(self, filename):
-        """Serialise this runner as a file which can be loaded with `Runner.load`.
+        """Serialise this runner as a file which can be loaded with `Runner.load`
 
         Parameters
         ----------
@@ -195,8 +208,39 @@ class Runner(object):
 
     def dumps(self):
         """Serialise this runner as a string which can be loaded with with `Runner.loads`.
+
+        Returns
+        -------
+        :obj:`str`
+            String representation of the job that can be loaded with
+            `Runner.loads`
         """
         return json.dumps([CURRENT_DATA_VERSION, self.api_url, self.id, self.token, self._data])
+
+    def request_job(self):
+        """Request a new job to run.
+
+        Returns
+        -------
+        :py:class:`Job <gl_runner_api.Job>` or None
+        """
+        request = requests.post(self.api_url+'/api/v4/jobs/request',
+                                json={'token': self.token, 'info': self._info})
+        if request.status_code == 201:
+            logger.info('%s: Got a job %d',
+                        urlparse(request.url).netloc, self.id)
+            return Job(self, request.json())
+        elif request.status_code == 204:
+            logger.error('%s: No jobs available %d with token %s',
+                         urlparse(request.url).netloc, self.id, self.token)
+            return None
+        elif request.status_code == 403:
+            logger.error('%s: Failed to authenticate runner %d with token %s',
+                         urlparse(request.url).netloc, self.id, self.token)
+            raise AuthException()
+        else:
+            raise NotImplementedError('Unrecognised status code from request',
+                                      request, request.content)
 
     def __repr__(self):
         return 'Runner(id={id}, token={token})'.format(
