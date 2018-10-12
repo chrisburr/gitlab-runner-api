@@ -14,6 +14,6 @@ __all__ = [
 handler = colorlog.StreamHandler()
 handler.setFormatter(colorlog.ColoredFormatter(
     '%(log_color)s%(levelname)s:%(name)s:%(message)s'))
-logger = colorlog.getLogger('gl_runner_api')
+logger = colorlog.getLogger('gitlab_runner_api')
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)

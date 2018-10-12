@@ -60,7 +60,7 @@ class Runner(object):
 
         Returns
         -------
-        :py:class:`Runner <gl_runner_api.Runner>`
+        :py:class:`Runner <gitlab_runner_api.Runner>`
         """
         if not isinstance(token, six.string_types):
             raise ValueError('token must a string')
@@ -152,7 +152,7 @@ class Runner(object):
 
         Returns
         -------
-        :py:class:`Runner <gl_runner_api.Runner>`
+        :py:class:`Runner <gitlab_runner_api.Runner>`
         """
         with open(filename, 'rt') as fp:
             return cls.loads(fp.read())
@@ -168,7 +168,7 @@ class Runner(object):
 
         Returns
         -------
-        :py:class:`Runner <gl_runner_api.Runner>`
+        :py:class:`Runner <gitlab_runner_api.Runner>`
         """
         data = json.loads(data)
         version, data = data[0], data[1:]
@@ -222,7 +222,7 @@ class Runner(object):
 
         Returns
         -------
-        :py:class:`Job <gl_runner_api.Job>` or None
+        :py:class:`Job <gitlab_runner_api.Job>` or None
         """
         request = requests.post(self.api_url+'/api/v4/jobs/request',
                                 json={'token': self.token, 'info': self._info})

@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import requests
 
-from gl_runner_api.testing import API_ENDPOINT, FakeGitlabAPI
+from gitlab_runner_api.testing import API_ENDPOINT, FakeGitlabAPI
 
 
 gitlab_api = FakeGitlabAPI()

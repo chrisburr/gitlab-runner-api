@@ -77,7 +77,7 @@ class Job(object):
         )
 
     def __repr__(self):
-        return 'gl_runner_api.testing.Job(id={id}, status={status})'.format(
+        return 'gitlab_runner_api.testing.Job(id={id}, status={status})'.format(
             id=self.id,
             status=self.status
         )

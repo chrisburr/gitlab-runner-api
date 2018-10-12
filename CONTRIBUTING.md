@@ -6,7 +6,7 @@ For now this file just contains an example of how to use the testing API:
 import requests
 import zipfile
 import io
-from gl_runner_api.testing import FakeGitlabAPI, API_ENDPOINT
+from gitlab_runner_api.testing import FakeGitlabAPI, API_ENDPOINT
 
 # Instead of using the context manager enter it manually
 # with FakeGitlabAPI(n_pending=10) as gitlab_api:

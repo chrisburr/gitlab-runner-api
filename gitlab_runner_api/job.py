@@ -19,7 +19,7 @@ class Job(object):
 
         Returns
         -------
-        :py:class:`Job <gl_runner_api.Job>`
+        :py:class:`Job <gitlab_runner_api.Job>`
         """
         with open(filename, 'rt') as fp:
             return cls.loads(fp.read())
@@ -35,7 +35,7 @@ class Job(object):
 
         Returns
         -------
-        :py:class:`Job <gl_runner_api.Job>`
+        :py:class:`Job <gitlab_runner_api.Job>`
         """
         data = json.loads(data)
         version, data = data[0], data[1:]

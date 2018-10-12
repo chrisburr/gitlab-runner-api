@@ -6,8 +6,8 @@ import json
 import pytest
 import tempfile
 
-from gl_runner_api import AuthException, Job, Runner
-from gl_runner_api.testing import FakeGitlabAPI
+from gitlab_runner_api import AuthException, Job, Runner
+from gitlab_runner_api.testing import FakeGitlabAPI
 
 
 gitlab_api = FakeGitlabAPI()

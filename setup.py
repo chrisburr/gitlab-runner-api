@@ -5,7 +5,7 @@ from distutils.core import setup
 
 
 # Load the version
-with open(join(os.getcwd(), 'gl_runner_api', 'version.py'), 'rt') as fp:
+with open(join(os.getcwd(), 'gitlab_runner_api', 'version.py'), 'rt') as fp:
     exec(fp.read())
 
 # Load the README
@@ -14,10 +14,10 @@ with open(join('README.rst'), 'rt') as fp:
 
 # Define the package
 setup(
-    name='gl_runner_api',
+    name='gitlab_runner_api',
     version=version,
     data_files=[('', ['README.rst'])],
-    packages=['gl_runner_api', 'gl_runner_api.testing'],
+    packages=['gitlab_runner_api', 'gitlab_runner_api.testing'],
     license='LICENSE.txt',
     long_description=readme_text,
     install_requires=['colorlog', 'requests', 'six'],
