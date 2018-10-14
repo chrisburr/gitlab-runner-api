@@ -231,8 +231,8 @@ class Runner(object):
                         urlparse(request.url).netloc, self.id)
             return Job(self, request.json())
         elif request.status_code == 204:
-            logger.error('%s: No jobs available %d with token %s',
-                         urlparse(request.url).netloc, self.id, self.token)
+            logger.info('%s: No jobs available %d with token %s',
+                        urlparse(request.url).netloc, self.id, self.token)
             return None
         elif request.status_code == 403:
             logger.error('%s: Failed to authenticate runner %d with token %s',

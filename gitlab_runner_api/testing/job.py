@@ -19,18 +19,18 @@ __all__ = [
 ]
 
 
-# class JobVariable():
-#     def __init__(self, key, public, value):
-#         self.key = key
-#         self.public = public
-#         self.value = value
+class JobVariable():
+    def __init__(self, key, value,  public=True):
+        self.key = key
+        self.public = public
+        self.value = value
 
-#     def as_dict(self):
-#         return {
-#             'key': self.key,
-#             'public': self.public,
-#             'value': self.value,
-#         }
+    def as_dict(self):
+        return {
+            'key': self.key,
+            'public': self.public,
+            'value': self.value,
+        }
 
 
 class Job(object):
@@ -47,7 +47,11 @@ class Job(object):
         self._id = job_id
         self._job_info = job_info
         self._token = random_string(string.ascii_letters+'_-', 20)
-        self._variables = []
+        self._variables = [
+            JobVariable('GITLAB_CI', 'true'),
+            JobVariable('GITLAB_USER_EMAIL', 'someone@example.com'),
+            JobVariable('GITLAB_USER_LOGIN', 'someone'),
+        ]
         self.log = ''
         self._status = 'running'
         self._failure_reason = None
