@@ -181,12 +181,12 @@ class DockerExecutor(object):
         with DockerContainer(self._job) as container:
             exit_code = container._run_script('setup_repo.sh')
             if exit_code != 0:
-                self._job.set_failed(RunnerSystemFailure)
+                self._job.set_failed(RunnerSystemFailure())
                 return
 
             exit_code = container._run_script('download_artifacts.sh')
             if exit_code != 0:
-                self._job.set_failed(RunnerSystemFailure)
+                self._job.set_failed(RunnerSystemFailure())
                 return
 
             job_exit_code = container._run_script('run_job.sh')
@@ -201,4 +201,4 @@ class DockerExecutor(object):
                 self._job.set_success()
             else:
                 self._job.log += ansi.BOLD_RED+'ERROR: Got non-zero status code ('+job_exit_code+') when running job\n'+ansi.RESET
-                self._job.set_failed(failure_reason=ScriptFailure)
+                self._job.set_failed(failure_reason=ScriptFailure())

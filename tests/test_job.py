@@ -7,6 +7,7 @@ import json
 import pytest
 import tempfile
 
+import gitlab_runner_api
 from gitlab_runner_api import (AlreadyFinishedExcpetion, AuthException, Job,
                                Runner, failure_reasons)
 from gitlab_runner_api.testing import FakeGitlabAPI
@@ -106,7 +107,8 @@ def check_finished(n_pending, n_running, n_completed, status, log, failure_reaso
     assert len(gitlab_api.completed_jobs) == n_completed
 
     assert gitlab_api.completed_jobs[0].status == status
-    assert gitlab_api.completed_jobs[0].log == log
+    log_prefix = 'Running with gitlab_runner_api '+gitlab_runner_api.__version__+'\n'
+    assert gitlab_api.completed_jobs[0].log == log_prefix+log
     assert gitlab_api.completed_jobs[0].failure_reason == failure_reason
 
 
@@ -191,20 +193,20 @@ def test_set_success_twice(gitlab_api):
 def test_set_success_with_log(gitlab_api):
     runner = Runner.register('https://gitlab.cern.ch', gitlab_api.token)
     job = runner.request_job()
-
-    job.set_success(log='test log text')
+    job.log += 'test log text'
+    job.set_success()
 
     # Check the API's internal state
     check_finished(1, 0, 1, 'success', 'test log text', None)
 
 
 @gitlab_api.use(n_pending=2)
-def test_set_success_with_bad_log(gitlab_api):
+def test_bad_log(gitlab_api):
     runner = Runner.register('https://gitlab.cern.ch', gitlab_api.token)
     job = runner.request_job()
 
-    with pytest.raises(ValueError):
-        job.set_success(log=3456789)
+    with pytest.raises(TypeError):
+        job.log += 3456789
 
     # Check the API's internal state
     assert len(gitlab_api.pending_jobs) == 1
@@ -265,8 +267,8 @@ def test_set_failed_twice(gitlab_api):
 def test_set_failed_with_log(gitlab_api):
     runner = Runner.register('https://gitlab.cern.ch', gitlab_api.token)
     job = runner.request_job()
-
-    job.set_failed(log='test log text')
+    job.log += 'test log text'
+    job.set_failed()
 
     # Check the API's internal state
     check_finished(1, 0, 1, 'failed', 'test log text', 'unknown_failure')

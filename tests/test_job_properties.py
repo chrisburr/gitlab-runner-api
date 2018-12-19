@@ -61,7 +61,7 @@ def test_variables(gitlab_api):
     job = runner.request_job()
 
     api_variables = gitlab_api.running_jobs[0].as_dict()['variables']
-    assert len(api_variables) == len(job.variables)
+    assert len(api_variables) == len(job.variables) - 3
     for api_var, package_var in zip(api_variables, job.variables):
         assert api_var['key'] == package_var.key
         assert api_var['value'] == package_var.value

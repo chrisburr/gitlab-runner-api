@@ -51,6 +51,8 @@ class Job(object):
             JobVariable('GITLAB_CI', 'true'),
             JobVariable('GITLAB_USER_EMAIL', 'someone@example.com'),
             JobVariable('GITLAB_USER_LOGIN', 'someone'),
+            JobVariable('CI_PROJECT_PATH', 'someone/some-project'),
+            JobVariable('CI_JOB_URL', 'https://gitlab.com/someone/some-project/-/jobs/1234'),
         ]
         self.log = ''
         self._status = 'running'

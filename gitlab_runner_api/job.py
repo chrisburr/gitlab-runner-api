@@ -80,9 +80,9 @@ class Job(object):
             logger.fatal('%s: Failed to parse job %d\'s description\n%s',
                          urlparse(self._runner.api_url).netloc, self.id, exception_string)
             if fail_on_error:
-                log = 'gitlab_runner_api failed to parse job description\n'
-                log += exception_string
-                self.set_failed(RunnerSystemFailure(), log)
+                self.log += 'gitlab_runner_api failed to parse job description\n'
+                self.log += exception_string
+                self.set_failed(RunnerSystemFailure())
             raise
 
     def _parse_job_info(self):
@@ -335,6 +335,9 @@ class JobLog(object):
 
     def __str__(self):
         return self._log
+
+    def __eq__(self, other):
+        return self._log == other._log
 
     def __add__(self, other):
         raise AttributeError('+ is not supported, use += instead')
