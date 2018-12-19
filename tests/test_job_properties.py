@@ -61,8 +61,10 @@ def test_variables(gitlab_api):
     job = runner.request_job()
 
     api_variables = gitlab_api.running_jobs[0].as_dict()['variables']
+    job_variables = {v.key: v for v in job.variables}
     assert len(api_variables) == len(job.variables) - 3
-    for api_var, package_var in zip(api_variables, job.variables):
-        assert api_var['key'] == package_var.key
-        assert api_var['value'] == package_var.value
-        assert api_var['public'] is package_var.is_public
+    for api_var in api_variables:
+        job_variable = job_variables[api_var['key']]
+        assert api_var['key'] == job_variable.key
+        assert api_var['value'] == job_variable.value
+        assert api_var['public'] is job_variable.is_public
