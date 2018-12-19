@@ -8,8 +8,8 @@ import tarfile
 
 import docker
 
-from ..exceptions import ImagePullException
-from ..failure_reasons import RunnerSystemFailure, ScriptFailure, StuckOrTimeoutFailure, UnknownFailure
+from ..exceptions import ImagePullException, JobTimeoutException
+from ..failure_reasons import RunnerSystemFailure, ScriptFailure, StuckOrTimeoutFailure
 from ..logging import logger
 from ..utils import ansi, get_template, Retrier
 
@@ -97,7 +97,7 @@ class DockerContainer(object):
         file_info.mode = 555
         file_data = io.BytesIO()
         file_data.write(script.encode('utf-8'))
-        file_info.size = file_data.getbuffer().nbytes
+        file_info.size = len(file_data.getvalue())
         file_data.seek(0)
 
         # Convert the TarInfo to an in memory TarFile
@@ -108,7 +108,7 @@ class DockerContainer(object):
 
         self._container.put_archive('/', tar_data)
 
-    def _run_script(self, name):
+    def _run_script(self, name, timeout=None):
         self._write_script(name)
 
         process = DockerProcess(self, name)
@@ -145,7 +145,11 @@ class DockerProcess(object):
         self._socket = self._client.api.exec_start(
             self._id, detach=False, tty=True, stream=False, socket=True
         )
-        self._socket._sock.setblocking(False)
+        if hasattr(self._socket, '_sock'):
+            self._socket._sock.setblocking(False)
+        else:
+            # Python 2.7 returns a socket instead of SocketIO
+            self._socket.setblocking(False)
 
     @property
     def is_running(self):
@@ -160,7 +164,12 @@ class DockerProcess(object):
         return bool(readable)
 
     def read(self, max_bytes=-1):
-        return self._socket.read(max_bytes).decode('utf-8')
+        if hasattr(self._socket, 'read'):
+            data = self._socket.read(max_bytes)
+        else:
+            # Python 2.7 returns a socket instead of SocketIO
+            data = self._socket.recv(max(max_bytes, 0))
+        return data.decode('utf-8')
 
     @property
     def exit_code(self):
@@ -191,13 +200,21 @@ class DockerExecutor(object):
 
             job_exit_code = container._run_script('run_job.sh')
 
-            exit_code = container._run_script('run_after_script.sh')
-            if exit_code != 0:
-                self._job.log += ansi.BOLD_YELLOW+'WARNING: Got non-zero status code ('+job_exit_code+') when running after_script\n'+ansi.RESET
+            try:
+                exit_code = container._run_script('run_after_script.sh')
+            except JobTimeoutException:
+                timed_out = True
+            else:
+                timed_out = False
+                if exit_code != 0:
+                    self._job.log += ansi.BOLD_YELLOW+'WARNING: Got non-zero status code ('+job_exit_code+') when running after_script\n'+ansi.RESET
 
             exit_code = container._run_script('upload_artifacts.sh')
 
-            if job_exit_code == 0:
+            if timed_out:
+                self._job.log += ansi.BOLD_RED+'ERROR: Job timed out\n'+ansi.RESET
+                self._job.set_failed(failure_reason=StuckOrTimeoutFailure())
+            elif job_exit_code == 0:
                 self._job.set_success()
             else:
                 self._job.log += ansi.BOLD_RED+'ERROR: Got non-zero status code ('+job_exit_code+') when running job\n'+ansi.RESET

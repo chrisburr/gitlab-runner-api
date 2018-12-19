@@ -24,3 +24,7 @@ class AuthException(Exception):
 
 class ImagePullException(Exception):
     pass
+
+
+class JobTimeoutException(Exception):
+    pass
