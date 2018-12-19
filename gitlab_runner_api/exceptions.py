@@ -6,6 +6,7 @@ __all__ = [
     'AlreadyFinishedExcpetion',
     'APIExcpetion',
     'AuthException',
+    'ImagePullException',
 ]
 
 
@@ -18,4 +19,8 @@ class APIExcpetion(Exception):
 
 
 class AuthException(Exception):
+    pass
+
+
+class ImagePullException(Exception):
     pass

@@ -1,0 +1,15 @@
+{% set change_working_directory = False %}
+{% include 'setup_shell.sh.j2' %}
+
+echo "{{ ansi.BOLD_GREEN }}Cloning repository...{{ ansi.RESET }}"
+git clone "${CI_REPOSITORY_URL}" "${CI_PROJECT_DIR}"
+
+echo "{{ ansi.BOLD_GREEN }}Checking out ${CI_COMMIT_SHA} as ${CI_COMMIT_REF_NAME}{{ ansi.RESET }}"
+cd "${CI_PROJECT_DIR}"
+git checkout -f -q "${CI_COMMIT_SHA}"
+
+echo "{{ ansi.BOLD_GREEN }}Updating/initializing submodules recursively...{{ ansi.RESET }}"
+git submodule sync --recursive
+git submodule foreach --recursive git clean -ffxd
+git submodule foreach --recursive git reset --hard
+git submodule update --init --recursive

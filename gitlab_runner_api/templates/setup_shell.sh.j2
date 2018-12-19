@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+
+{% for var in job.variables -%}
+{{ var.bash }}
+{% endfor %}
+
+{% if change_working_directory %}
+cd "${CI_PROJECT_DIR}"
+{% endif %}

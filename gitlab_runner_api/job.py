@@ -88,11 +88,20 @@ class Job(object):
 
         self._token = self._job_info['token']
 
-        self._variables = []
+        self._variables = {}
         for var_info in self._job_info['variables']:
             logger.debug('%s: Parsing environment variable from job %d (%s)',
                          urlparse(self._runner.api_url).netloc, self.id, repr(var_info))
-            self._variables.append(EnvVar(**var_info))
+            var = EnvVar(**var_info)
+            self._variables[var.key] = var
+
+        internal_variables = [
+            EnvVar('CI_PROJECT_DIR', '/builds/'+self.project_path, True),
+            EnvVar('CI_SERVER', 'yes', True),
+            EnvVar('CI_DISPOSABLE_ENVIRONMENT', 'true', True),
+        ]
+        for var in internal_variables:
+            self._variables[var.key] = var
 
     def __repr__(self):
         return 'Job(id={id}, token={token}, state={state})'.format(
@@ -197,7 +206,46 @@ class Job(object):
 
     @property
     def variables(self):
-        return self._variables
+        return list(self._variables.values())
+
+    @property
+    def username(self):
+        return self._variables['GITLAB_USER_LOGIN'].value
+
+    @property
+    def project_path(self):
+        return self._variables['CI_PROJECT_PATH'].value
+
+    @property
+    def repo_url(self):
+        return self._job_info['git_info']['repo_url']
+
+    @property
+    def repo_commit(self):
+        return self._job_info['git_info']['sha']
+
+    @property
+    def script(self):
+        assert len(self._job_info['steps']) in [1, 2]
+        return self._job_info['steps'][0]['script']
+
+    @property
+    def after_script(self):
+        if len(self._job_info['steps']) >= 2:
+            return self._job_info['steps'][1]['script']
+
+    def get_credential(self, credential_type):
+        matched = []
+        for credential in self._job_info['credentials']:
+            if credential['type'] == credential_type:
+                matched.append(credential)
+        if len(matched) == 0:
+            raise KeyError('Not credential of type '+credential_type+' found')
+        elif len(matched) == 1:
+            return matched[0].copy()
+        else:
+            raise NotImplementedError('Found multiple matching credentials',
+                                      self._job_info['credentials'])
 
 
 class EnvVar(object):
@@ -251,3 +299,7 @@ class EnvVar(object):
     @property
     def is_masked(self):
         return self._is_masked
+    
+    def bash(self):
+        return 'export {key}="{value}"'.format(key=self.key, value=self.value)
+

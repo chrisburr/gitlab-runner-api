@@ -20,6 +20,6 @@ setup(
     packages=['gitlab_runner_api', 'gitlab_runner_api.testing'],
     license='LICENSE.txt',
     long_description=readme_text,
-    install_requires=['colorlog', 'requests', 'six'],
+    install_requires=['colorlog', 'requests', 'six', 'docker', 'jinja2'],
     tests_require=['pytest', 'responses', 'requests-toolbelt'],
 )
