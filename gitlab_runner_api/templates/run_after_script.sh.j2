@@ -3,6 +3,6 @@
 
 echo "{{ ansi.BOLD_GREEN }}Running after script...{{ ansi.RESET }}"
 {% for line in job.after_script -%}
-echo "{{ ansi.BOLD_BLACK }}{{ line|replace('"', '\\"') }}{{ ansi.RESET }}"
+echo "{{ ansi.BOLD_GREEN }}\$ {{ line|replace('"', '\\"') }}{{ ansi.RESET }}"
 {{line}}
 {% endfor %}

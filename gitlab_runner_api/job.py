@@ -23,6 +23,7 @@ from .exceptions import AlreadyFinishedExcpetion, AuthException
 from .failure_reasons import _FailureReason, RunnerSystemFailure, UnknownFailure
 from .logging import logger
 from .version import CURRENT_DATA_VERSION
+from .version import version as package_version
 
 
 class Job(object):
@@ -59,16 +60,17 @@ class Job(object):
         version, data = data[0], data[1:]
         if version == 1:
             from .runner import Runner
-            runner_info, job_info, state = data
+            runner_info, job_info, state, log = data
             return cls(Runner.loads(runner_info), job_info,
-                       fail_on_error=False, state=state)
+                       fail_on_error=False, state=state, log=log)
         else:
             raise ValueError('Unrecognised data version: '+str(version))
 
-    def __init__(self, runner, job_info, fail_on_error=True, state='running'):
+    def __init__(self, runner, job_info, fail_on_error=True, state='running', log=None):
         self._runner = runner
         self._state = 'running'  # All jobs start as running
         self.state = state
+        self._log = JobLog(self, log)
         # TODO Create and validate a schema for the job_info dict
         self._job_info = job_info
         try:
@@ -132,15 +134,15 @@ class Job(object):
             `Job.loads`
         """
         return json.dumps([CURRENT_DATA_VERSION, self._runner.dumps(),
-                           self._job_info, self.state])
+                           self._job_info, self.state, str(self.log)])
 
-    def set_success(self, log=None, artifacts=None):
-        self._set_status('success', log, artifacts)
+    def set_success(self, artifacts=None):
+        self._set_status('success', artifacts)
 
-    def set_failed(self, failure_reason=None, log=None, artifacts=None):
-        self._set_status('failed', log, artifacts, failure_reason)
+    def set_failed(self, failure_reason=None, artifacts=None):
+        self._set_status('failed', artifacts, failure_reason)
 
-    def _set_status(self, state, log, artifacts, failure_reason=None):
+    def _set_status(self, state, artifacts, failure_reason=None):
         if self.state != 'running':
             raise AlreadyFinishedExcpetion('Job {id} has already finished as {state}'
                                            .format(id=self.id, state=self.state))
@@ -150,10 +152,7 @@ class Job(object):
             'state': state,
         }
 
-        if log is not None:
-            if not isinstance(log, six.string_types):
-                raise ValueError()
-            data['trace'] = log
+        data['trace'] = str(self.log)
 
         if state == 'failed':
             if failure_reason is None:
@@ -205,6 +204,16 @@ class Job(object):
         self._state = new_state
 
     @property
+    def log(self):
+        return self._log
+
+    @log.setter
+    def log(self, log):
+        if not isinstance(log, JobLog):
+            raise TypeError('Expected JobLog but got '+type(JobLog).__name__)
+        self._log = log
+
+    @property
     def variables(self):
         return list(self._variables.values())
 
@@ -221,26 +230,37 @@ class Job(object):
         return self._job_info['git_info']['repo_url']
 
     @property
+    def job_url(self):
+        return self._variables['CI_JOB_URL'].value
+
+    @property
     def repo_commit(self):
         return self._job_info['git_info']['sha']
 
     @property
     def script(self):
+        # TODO This is incomplete
         assert len(self._job_info['steps']) in [1, 2]
         return self._job_info['steps'][0]['script']
 
     @property
     def after_script(self):
+        # TODO This is incomplete
+        assert len(self._job_info['steps']) in [1, 2]
         if len(self._job_info['steps']) >= 2:
             return self._job_info['steps'][1]['script']
 
-    def get_credential(self, credential_type):
+    def get_registry_credential(self, image_name):
         matched = []
         for credential in self._job_info['credentials']:
-            if credential['type'] == credential_type:
-                matched.append(credential)
+            if credential['type'] != 'registry':
+                continue
+            if not image_name.startswith(credential['url']):
+                continue
+            matched.append(credential)
+
         if len(matched) == 0:
-            raise KeyError('Not credential of type '+credential_type+' found')
+            raise KeyError('No registry credential found for '+image_name)
         elif len(matched) == 1:
             return matched[0].copy()
         else:
@@ -303,3 +323,23 @@ class EnvVar(object):
     def bash(self):
         return 'export {key}="{value}"'.format(key=self.key, value=self.value)
 
+
+class JobLog(object):
+    def __init__(self, job, log=None):
+        self._job = job
+        if log is None:
+            log = '\n'.join([
+                'Running with gitlab_runner_api '+package_version,
+            ]) + '\n'
+        self._log = log
+
+    def __str__(self):
+        return self._log
+
+    def __add__(self, other):
+        raise AttributeError('+ is not supported, use += instead')
+
+    def __iadd__(self, other):
+        logger.debug('Job %d: Appending to log: %s', self._job.id, other)
+        self._log += other
+        return self

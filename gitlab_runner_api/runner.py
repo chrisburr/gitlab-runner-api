@@ -120,8 +120,7 @@ class Runner(object):
                 raise ValueError('executor must a string')
             data['info']['executor'] = executor
 
-        request = requests.post(api_url+'/api/v4/runners/',
-                                json=data)
+        request = requests.post(api_url+'/api/v4/runners/', json=data)
         if request.status_code == 201:
             runner_id = int(request.json()['id'])
             runner_token = request.json()['token']
@@ -227,9 +226,10 @@ class Runner(object):
         request = requests.post(self.api_url+'/api/v4/jobs/request',
                                 json={'token': self.token, 'info': self._info})
         if request.status_code == 201:
-            logger.info('%s: Got a job %d',
-                        urlparse(request.url).netloc, self.id)
-            return Job(self, request.json())
+            job = Job(self, request.json())
+            logger.info('%s: Got a job %s for runner %d',
+                        urlparse(request.url).netloc, job.job_url, self.id)
+            return job
         elif request.status_code == 204:
             logger.info('%s: No jobs available %d with token %s',
                         urlparse(request.url).netloc, self.id, self.token)
