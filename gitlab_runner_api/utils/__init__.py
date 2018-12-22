@@ -33,6 +33,6 @@ class Retrier(object):
             try:
                 return self._func(*args, **kwargs)
             except self._to_catch:
-                logger.warn('Caught error running %s, retry %d of %d',
-                            self._func.__name__, i, self._n_retries)
+                logger.warning('Caught error running %s, retry %d of %d',
+                               self._func.__name__, i, self._n_retries)
         raise self._to_raise

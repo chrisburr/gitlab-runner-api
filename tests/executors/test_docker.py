@@ -16,3 +16,9 @@ def test_good(gitlab_api):
     job = runner.request_job()
     executor = DockerExecutor(job)
     executor.run()
+
+    # Check the API's internal state
+    assert len(gitlab_api.pending_jobs) == 1
+    assert len(gitlab_api.running_jobs) == 0
+    assert len(gitlab_api.completed_jobs) == 1
+    assert gitlab_api.completed_jobs[0].status == 'success'

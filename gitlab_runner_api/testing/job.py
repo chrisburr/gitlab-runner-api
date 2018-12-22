@@ -53,6 +53,11 @@ class Job(object):
             JobVariable('GITLAB_USER_LOGIN', 'someone'),
             JobVariable('CI_PROJECT_PATH', 'someone/some-project'),
             JobVariable('CI_JOB_URL', 'https://gitlab.com/someone/some-project/-/jobs/1234'),
+            JobVariable('CI_REPOSITORY_URL', 'https://gitlab.cern.ch/lhcb-gitlab-runners/runner-api.git'),
+            JobVariable('CI_COMMIT_SHA', 'ff37e0611e570eeb4f0f9c704abd698a40759ba6'),
+            JobVariable('CI_COMMIT_REF_NAME', 'master'),
+            JobVariable('CI_JOB_NAME', 'example_job'),
+            JobVariable('CI_JOB_ID', '1234567'),
         ]
         self.log = ''
         self._status = 'running'
@@ -310,8 +315,8 @@ class Job(object):
                 'before_sha': '0000000000000000000000000000000000000000',
                 'ref': 'master',
                 'ref_type': 'branch',
-                'repo_url': 'https://gitlab-ci-token:'+self.token+'@gitlab.cern.ch/bcouturi/test-runner.git',
-                'sha': '3f8fb3903b4ddde17151bac3d9f238b02bf371d0'
+                'repo_url': 'https://gitlab.cern.ch/lhcb-gitlab-runners/runner-api.git',
+                'sha': 'ff37e0611e570eeb4f0f9c704abd698a40759ba6'
             },
             'id': int(self.id),
             'image': {
@@ -334,7 +339,9 @@ class Job(object):
                     'allow_failure': False,
                     'name': 'script',
                     'script': [
-                        'nosetests -v --nocapture'
+                        'pwd',
+                        'ls',
+                        'env',
                     ],
                     'timeout': 3600,
                     'when': 'on_success'

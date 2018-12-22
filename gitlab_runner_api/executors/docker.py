@@ -7,8 +7,9 @@ import select
 import tarfile
 
 import docker
+from requests import ConnectionError
 
-from ..exceptions import ImagePullException, JobTimeoutException
+from ..exceptions import DockerNotRunningException, ImagePullException, JobTimeoutException
 from ..failure_reasons import RunnerSystemFailure, ScriptFailure, StuckOrTimeoutFailure
 from ..logging import logger
 from ..utils import ansi, get_template, Retrier
@@ -17,6 +18,13 @@ from ..utils import ansi, get_template, Retrier
 class DockerContainer(object):
     def __init__(self, job):
         self._client = docker.from_env()
+        try:
+            self._client.ping()
+        except ConnectionError:
+            raise DockerNotRunningException(
+                'Failed to connect to docker daemon at ' +
+                self._client.api.base_url
+            )
 
         self._job = job
         self._container = None
@@ -183,11 +191,12 @@ class DockerProcess(object):
 
 
 class DockerExecutor(object):
-    def __init__(self, job):
+    def __init__(self, job, container_class=DockerContainer):
         self._job = job
+        self._container_class = container_class
 
     def run(self):
-        with DockerContainer(self._job) as container:
+        with self._container_class(self._job) as container:
             exit_code = container._run_script('setup_repo.sh')
             if exit_code != 0:
                 self._job.set_failed(RunnerSystemFailure())
@@ -198,14 +207,15 @@ class DockerExecutor(object):
                 self._job.set_failed(RunnerSystemFailure())
                 return
 
-            job_exit_code = container._run_script('run_job.sh')
-
             try:
-                exit_code = container._run_script('run_after_script.sh')
+                job_exit_code = container._run_script('run_job.sh')
             except JobTimeoutException:
                 timed_out = True
             else:
                 timed_out = False
+
+            if self._job.after_script is not None:
+                exit_code = container._run_script('run_after_script.sh')
                 if exit_code != 0:
                     self._job.log += ansi.BOLD_YELLOW+'WARNING: Got non-zero status code ('+job_exit_code+') when running after_script\n'+ansi.RESET
 

@@ -6,7 +6,9 @@ __all__ = [
     'AlreadyFinishedExcpetion',
     'APIExcpetion',
     'AuthException',
+    'DockerNotRunningException',
     'ImagePullException',
+    'JobTimeoutException',
 ]
 
 
@@ -19,6 +21,10 @@ class APIExcpetion(Exception):
 
 
 class AuthException(Exception):
+    pass
+
+
+class DockerNotRunningException(Exception):
     pass
 
 
