@@ -17,7 +17,6 @@ except ImportError:
     from urlparse import urlparse
 
 import requests
-import six
 
 from .exceptions import AlreadyFinishedExcpetion, AuthException
 from .failure_reasons import _FailureReason, RunnerSystemFailure, UnknownFailure
@@ -137,22 +136,26 @@ class Job(object):
                            self._job_info, self.state, str(self.log)])
 
     def set_success(self, artifacts=None):
-        self._set_status('success', artifacts)
+        self._update_state('success', artifacts)
 
     def set_failed(self, failure_reason=None, artifacts=None):
-        self._set_status('failed', artifacts, failure_reason)
+        self._update_state('failed', artifacts, failure_reason)
 
-    def _set_status(self, state, artifacts, failure_reason=None):
+    def _update_state(self, state=None, artifacts=None, failure_reason=None):
         if self.state != 'running':
-            raise AlreadyFinishedExcpetion('Job {id} has already finished as {state}'
-                                           .format(id=self.id, state=self.state))
+            raise AlreadyFinishedExcpetion(
+                'Job {id} has already finished as {state}'
+                .format(id=self.id, state=self.state)
+            )
 
         data = {
             'token': self.token,
-            'state': state,
         }
 
         data['trace'] = str(self.log)
+
+        if state is not None:
+            data['state'] = state
 
         if state == 'failed':
             if failure_reason is None:
@@ -167,8 +170,12 @@ class Job(object):
         response = requests.put(self._runner.api_url+'/api/v4/jobs/'+str(self.id), json=data)
 
         if response.status_code == 200:
-            logger.info('%s: Set job %d as %s',
-                        urlparse(response.url).netloc, self.id, state)
+            if state is None:
+                logger.info('%s: Updated log for job %d',
+                            urlparse(response.url).netloc, self.id)
+            else:
+                logger.info('%s: Set job %d as %s',
+                            urlparse(response.url).netloc, self.id, state)
         elif response.status_code == 403:
             logger.error('%s: Failed to authenticate job %d with token %s',
                          urlparse(response.url).netloc, self.id, self.token)
@@ -177,7 +184,8 @@ class Job(object):
             raise NotImplementedError('Unrecognised status code from request',
                                       response, response.content)
 
-        self.state = state
+        if state is not None:
+            self.state = state
 
     def _upload_artifacts(self, artifacts):
         raise NotImplementedError()
@@ -328,10 +336,11 @@ class JobLog(object):
     def __init__(self, job, log=None):
         self._job = job
         if log is None:
-            log = '\n'.join([
-                'Running with gitlab_runner_api '+package_version,
-            ]) + '\n'
-        self._log = log
+            self._log = 'Running with gitlab_runner_api '+package_version+'\n'
+            self._remote_length = 0
+        else:
+            self._log = log
+            self._remote_length = len(log)
 
     def __str__(self):
         return self._log
@@ -343,6 +352,41 @@ class JobLog(object):
         raise AttributeError('+ is not supported, use += instead')
 
     def __iadd__(self, other):
+        if other == '':
+            logger.debug('Job %d: Skipping empty log patch', self._job.id)
+            return self
+
         logger.debug('Job %d: Appending to log: %s', self._job.id, other)
-        self._log += other
+        self._log += str(other)
+
+        # Update the log on GitLab
+        headers = {
+            'JOB-TOKEN': self._job.token,
+            'Content-Range': str(self._remote_length)+'-'+str(len(other)),
+        }
+        response = requests.patch(
+            self._job._runner.api_url+'/api/v4/jobs/'+str(self._job.id)+'/trace',
+            str(other), headers=headers
+        )
+
+        if response.status_code == 202:
+            logger.info('%s: Patched %d characters to Job %d',
+                        urlparse(response.url).netloc, len(other), self._job.id)
+            self._remote_length += len(other)
+        elif response.status_code == 403:
+            logger.error('%s: Failed to authenticate job %d with token %s',
+                         urlparse(response.url).netloc, self._job.id, self.token)
+            raise AuthException()
+        elif response.status_code == 416:
+            logger.warning("%s: Failed to patch Job %d's log with %s due to "
+                           "invalid content range, resetting...",
+                           urlparse(response.url).netloc, self._job.id, headers)
+            self._job._update_state()
+            self._remote_length = len(self._log)
+        else:
+            logger.warning('%s: Failed apply log patch to Job %d for unknown'
+                           'reason. Status code: %d Content: %s',
+                           urlparse(response.url).netloc, self._job.id,
+                           response.status_code, response.content)
+
         return self

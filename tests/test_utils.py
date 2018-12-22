@@ -29,7 +29,8 @@ def get_example_function(n_times_to_fail=2):
 def test_retrier_good():
     example_func = get_example_function()
     gitlab_runner_api.utils.Retrier(
-        example_func, ExampleException1, ExampleException2('My message')
+        example_func, ExampleException1, ExampleException2('My message'),
+        wait_seconds=0
     )()
 
 
@@ -39,6 +40,6 @@ def test_retrier_bad():
     with pytest.raises(ExampleException2, match='My message'):
         gitlab_runner_api.utils.Retrier(
             example_func, ExampleException1, ExampleException2('My message'),
-            n_retries=4
+            n_retries=4, wait_seconds=0
         )()
     assert example_func.n_tries == 4
