@@ -25,7 +25,7 @@ def test_setting_job_failure_reason(gitlab_api):
         job.failure_reason = 'invalid_reason'
 
 
-def test_request_init_with_artifacts():
+def test_request_init_with_artifacts(caplog):
     @gitlab_api.use(n_runners=2, n_pending=3, n_success=4, n_failed=4, n_with_artifacts=5)
     def tmp(gitlab_api):
         n = 0
@@ -33,22 +33,22 @@ def test_request_init_with_artifacts():
             if job.file_data is not None:
                 n += 1
         assert n == 5
-    tmp()
+    tmp(caplog)
 
     with pytest.raises(ValueError):
         @gitlab_api.use(n_runners=2, n_pending=3, n_running=4, n_with_artifacts=1)
         def tmp(gitlab_api):
             pass
-        tmp()
+        tmp(caplog)
 
     with pytest.raises(ValueError):
         @gitlab_api.use(n_runners=2, n_success=2, n_with_artifacts=3)
         def tmp(gitlab_api):
             pass
-        tmp()
+        tmp(caplog)
 
     with pytest.raises(ValueError):
         @gitlab_api.use(n_runners=2, n_failed=3, n_with_artifacts=4)
         def tmp(gitlab_api):
             pass
-        tmp()
+        tmp(caplog)

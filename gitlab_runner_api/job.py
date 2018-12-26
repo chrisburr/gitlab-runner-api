@@ -345,8 +345,14 @@ class JobLog(object):
     def __str__(self):
         return self._log
 
+    def __len__(self):
+        return len(self._log)
+
     def __eq__(self, other):
-        return self._log == other._log
+        if isinstance(other, self.__class__):
+            return self._log == other._log
+        else:
+            return self._log == other
 
     def __add__(self, other):
         raise AttributeError('+ is not supported, use += instead')
@@ -362,11 +368,11 @@ class JobLog(object):
         # Update the log on GitLab
         headers = {
             'JOB-TOKEN': self._job.token,
-            'Content-Range': str(self._remote_length)+'-'+str(len(other)),
+            'Content-Range': str(self._remote_length)+'-'+str(len(self)-self._remote_length),
         }
         response = requests.patch(
             self._job._runner.api_url+'/api/v4/jobs/'+str(self._job.id)+'/trace',
-            str(other), headers=headers
+            str(self)[self._remote_length:], headers=headers
         )
 
         if response.status_code == 202:
@@ -375,7 +381,7 @@ class JobLog(object):
             self._remote_length += len(other)
         elif response.status_code == 403:
             logger.error('%s: Failed to authenticate job %d with token %s',
-                         urlparse(response.url).netloc, self._job.id, self.token)
+                         urlparse(response.url).netloc, self._job.id, self._job.token)
             raise AuthException()
         elif response.status_code == 416:
             logger.warning("%s: Failed to patch Job %d's log with %s due to "

@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import inspect
 import json
 import string
 
@@ -20,6 +21,11 @@ __all__ = [
     'test_log',
     'run_test_with_artifact',
 ]
+
+if six.PY2:
+    getfullargspec = inspect.getargspec
+else:
+    getfullargspec = inspect.getfullargspec
 
 
 class FakeGitlabAPI(object):
@@ -132,15 +138,19 @@ class FakeGitlabAPI(object):
     def use(self, n_runners=0, n_pending=0, n_running=0, n_success=0, n_failed=0, n_with_artifacts=0):
         def decorator(func):
             """Decorator to active the mocking for this API"""
-            def new_func(*args, **kwargs):
+            def new_func(caplog, *args, **kwargs):
                 self.n_runners = n_runners
                 self.n_pending = n_pending
                 self.n_running = n_running
                 self.n_success = n_success
                 self.n_failed = n_failed
                 self.n_with_artifacts = n_with_artifacts
+
                 with self:
-                    result = func(*args, gitlab_api=self, **kwargs)
+                    if 'caplog' in getfullargspec(func).args:
+                        result = func(*args, caplog=caplog, gitlab_api=self, **kwargs)
+                    else:
+                        result = func(*args, gitlab_api=self, **kwargs)
                 return result
             return new_func
         return decorator
