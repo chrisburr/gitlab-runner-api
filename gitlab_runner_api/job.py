@@ -202,7 +202,7 @@ class Job(object):
 
 class EnvVar(object):
     """docstring for EnvVar"""
-    def __init__(self, key, value, public):
+    def __init__(self, key='unknown', value='', public=False, masked=True, **kwargs):
         """
 
         Raises
@@ -219,8 +219,15 @@ class EnvVar(object):
             raise ValueError('Property "public" of EnvVar must be of type bool')
         self._is_public = public
 
+        if not isinstance(masked, bool):
+            raise ValueError('Property "masked" of EnvVar must be of type bool')
+        self._is_masked = masked
+
+        if kwargs:
+            logger.error('Unrecognised EnvVar argumnets %s', repr(kwargs))
+
     def __repr__(self):
-        if self.is_public:
+        if self.is_public and not self.is_masked:
             ret_val = 'EnvVar(key={key}, value={value})'
         else:
             ret_val = 'EnvVar(key={key})'
@@ -240,3 +247,7 @@ class EnvVar(object):
     @property
     def is_public(self):
         return self._is_public
+
+    @property
+    def is_masked(self):
+        return self._is_masked
