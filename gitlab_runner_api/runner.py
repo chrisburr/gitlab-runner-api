@@ -181,7 +181,9 @@ class Runner(object):
         self._id = runner_id
         self._token = runner_token
         self._data = data
+        self.check_auth()
 
+    def check_auth(self):
         request = requests.post(self.api_url+'/api/v4/runners/verify',
                                 json={'token': self.token})
         if request.status_code == 200:

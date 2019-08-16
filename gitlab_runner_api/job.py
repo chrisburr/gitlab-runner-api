@@ -234,6 +234,10 @@ class Job(object):
         return self._variables['CI_PROJECT_PATH'].value
 
     @property
+    def project_name(self):
+        return self._variables['CI_PROJECT_NAME'].value
+
+    @property
     def repo_url(self):
         return self._job_info['git_info']['repo_url']
 
@@ -244,6 +248,10 @@ class Job(object):
     @property
     def repo_commit(self):
         return self._job_info['git_info']['sha']
+
+    @property
+    def pipeline_id(self):
+        return self._variables['CI_PIPELINE_ID'].value
 
     @property
     def script(self):
@@ -327,7 +335,7 @@ class EnvVar(object):
     @property
     def is_masked(self):
         return self._is_masked
-    
+
     def bash(self):
         return 'export {key}="{value}"'.format(key=self.key, value=self.value)
 
