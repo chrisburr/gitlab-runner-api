@@ -21,8 +21,7 @@ import requests
 from .exceptions import AlreadyFinishedExcpetion, AuthException
 from .failure_reasons import _FailureReason, RunnerSystemFailure, UnknownFailure
 from .logging import logger
-from .version import CURRENT_DATA_VERSION
-from .version import version as package_version
+from .version import CURRENT_DATA_VERSION, package_version
 
 
 class Job(object):

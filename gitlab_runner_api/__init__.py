@@ -8,7 +8,6 @@ from . import utils
 from .exceptions import AlreadyFinishedExcpetion, APIExcpetion, AuthException
 from .job import Job
 from .runner import Runner
-from .version import __version__  # NOQA
 
 
 __all__ = [
