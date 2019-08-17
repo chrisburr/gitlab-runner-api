@@ -7,6 +7,7 @@ __all__ = [
     'package_version',
 ]
 
-from gitlab_runner_api import __version__ as package_version
+import pkg_resources  # part of setuptools
 
 CURRENT_DATA_VERSION = 1
+package_version = pkg_resources.require("gitlab_runner_api")[0].version
