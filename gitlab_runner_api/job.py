@@ -229,6 +229,10 @@ class Job(object):
         return self._variables['GITLAB_USER_LOGIN'].value
 
     @property
+    def project_url(self):
+        return self._variables['CI_PROJECT_URL'].value
+
+    @property
     def project_path(self):
         return self._variables['CI_PROJECT_PATH'].value
 
@@ -245,8 +249,12 @@ class Job(object):
         return self._variables['CI_JOB_URL'].value
 
     @property
-    def repo_commit(self):
+    def commit_sha(self):
         return self._job_info['git_info']['sha']
+
+    @property
+    def commit_message(self):
+        return self._variables['CI_COMMIT_MESSAGE'].value
 
     @property
     def pipeline_id(self):
