@@ -249,6 +249,10 @@ class Job(object):
         return self._variables['CI_JOB_URL'].value
 
     @property
+    def pipeline_url(self):
+        return self._variables['CI_PIPELINE_URL'].value
+
+    @property
     def commit_sha(self):
         return self._job_info['git_info']['sha']
 
