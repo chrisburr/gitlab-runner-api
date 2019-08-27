@@ -18,7 +18,7 @@ except ImportError:
 
 import requests
 
-from .exceptions import AlreadyFinishedExcpetion, AuthException
+from .exceptions import AlreadyFinishedExcpetion, AuthException, JobCancelledException
 from .failure_reasons import _FailureReason, RunnerSystemFailure, UnknownFailure
 from .logging import logger
 from .version import CURRENT_DATA_VERSION, package_version
@@ -178,7 +178,10 @@ class Job(object):
         elif response.status_code == 403:
             logger.error('%s: Failed to authenticate job %d with token %s',
                          urlparse(response.url).netloc, self.id, self.token)
-            raise AuthException()
+            if logger.headers['Job-Status'] == 'canceled':
+                raise JobCancelledException()
+            else:
+                raise AuthException()
         else:
             raise NotImplementedError('Unrecognised status code from request',
                                       response, response.content)
@@ -401,7 +404,10 @@ class JobLog(object):
         elif response.status_code == 403:
             logger.error('%s: Failed to authenticate job %d with token %s',
                          urlparse(response.url).netloc, self._job.id, self._job.token)
-            raise AuthException()
+            if logger.headers['Job-Status'] == 'canceled':
+                raise JobCancelledException()
+            else:
+                raise AuthException()
         elif response.status_code == 416:
             logger.warning("%s: Failed to patch Job %d's log with %s due to "
                            "invalid content range, resetting...",

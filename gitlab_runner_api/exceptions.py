@@ -9,6 +9,7 @@ __all__ = [
     'DockerNotRunningException',
     'ImagePullException',
     'JobTimeoutException',
+    'JobCancelledException',
 ]
 
 
@@ -33,4 +34,8 @@ class ImagePullException(Exception):
 
 
 class JobTimeoutException(Exception):
+    pass
+
+
+class JobCancelledException(Exception):
     pass
