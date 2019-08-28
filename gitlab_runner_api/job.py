@@ -404,7 +404,7 @@ class JobLog(object):
         elif response.status_code == 403:
             logger.error('%s: Failed to authenticate job %d with token %s',
                          urlparse(response.url).netloc, self._job.id, self._job.token)
-            if logger.headers['Job-Status'] == 'canceled':
+            if response.headers['Job-Status'] == 'canceled':
                 raise JobCancelledException()
             else:
                 raise AuthException()
