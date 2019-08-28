@@ -134,6 +134,22 @@ class Job(object):
         return json.dumps([CURRENT_DATA_VERSION, self._runner.dumps(),
                            self._job_info, self.state, str(self.log)])
 
+    def auth(self):
+        response = requests.put(
+            self._runner.api_url+'/api/v4/jobs/'+str(self.id),
+            json={'token': self.token}
+        )
+        if response.status_code == 200:
+            pass
+        elif response.status_code == 403:
+            if logger.headers['Job-Status'] == 'canceled':
+                raise JobCancelledException()
+            else:
+                raise AuthException()
+        else:
+            raise NotImplementedError('Unrecognised status code from request',
+                                      response, response.content)
+
     def set_success(self, artifacts=None):
         self._update_state('success', artifacts)
 
