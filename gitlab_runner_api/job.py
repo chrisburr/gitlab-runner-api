@@ -142,7 +142,7 @@ class Job(object):
         if response.status_code == 200:
             pass
         elif response.status_code == 403:
-            if logger.headers['Job-Status'] == 'canceled':
+            if response.headers['Job-Status'] == 'canceled':
                 raise JobCancelledException()
             else:
                 raise AuthException()
