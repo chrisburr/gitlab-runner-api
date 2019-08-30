@@ -272,6 +272,14 @@ class Job(object):
         return self._job_info['git_info']['repo_url']
 
     @property
+    def name(self):
+        return self._job_info['job_info']['name']
+
+    @property
+    def stage(self):
+        return self._job_info['job_info']['stage']
+
+    @property
     def job_url(self):
         return self._variables['CI_JOB_URL'].value
 
