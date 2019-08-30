@@ -260,6 +260,14 @@ class Job(object):
         return self._variables['CI_PROJECT_NAME'].value
 
     @property
+    def ref(self):
+        return self._job_info['git_info']['ref']
+
+    @property
+    def is_branch(self):
+        return self._job_info['git_info']['ref_type'] == 'branch'
+
+    @property
     def repo_url(self):
         return self._job_info['git_info']['repo_url']
 
