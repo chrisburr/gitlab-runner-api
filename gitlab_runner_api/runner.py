@@ -24,7 +24,7 @@ class Runner(object):
     def register(cls, api_url, token, description=None, active=None, locked=None,
                  run_untagged=None, tags=None, maximum_timeout=None,
                  name=None, version=None, revision=None, platform=None,
-                 architecture=None, executor=None):
+                 architecture=None, executor=None, access_level=None):
         """Register a new runner in GitLab.
 
         Parameters
@@ -57,6 +57,8 @@ class Runner(object):
             The runner's architecture
         executor : :obj:`str`, optional
             The runner's executor
+        access_level : :obj:`str`, optional
+            Limit the jobs which will be sent to the runner (for security)
 
         Returns
         -------
@@ -119,6 +121,14 @@ class Runner(object):
             if not isinstance(executor, six.string_types):
                 raise ValueError('executor must a string')
             data['info']['executor'] = executor
+        if access_level is not None:
+            if not isinstance(access_level, six.string_types):
+                raise ValueError('access_level must a string')
+            # https://gitlab.com/gitlab-org/gitlab-runner/blob/905d94ee0088ea3d43b987cfe0860614b7e34bbe/commands/register.go#L87-90
+            valid_values = ['not_protected', 'ref_protected']
+            if access_level not in valid_values:
+                raise ValueError('access_level must be one of %r' % valid_values)
+            data['info']['access_level'] = access_level
 
         request = requests.post(api_url+'/api/v4/runners/', json=data)
         if request.status_code == 201:
