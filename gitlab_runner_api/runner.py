@@ -250,6 +250,10 @@ class Runner(object):
             logger.error('%s: Failed to authenticate runner %d with token %s',
                          urlparse(request.url).netloc, self.id, self.token)
             raise AuthException()
+        elif request.status_code == 409:
+            logger.error('%s: Received 409 conflict for runner %d with token %s',
+                         urlparse(request.url).netloc, self.id, self.token)
+            return None
         else:
             raise NotImplementedError('Unrecognised status code from request',
                                       request, request.content)
