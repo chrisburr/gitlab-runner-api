@@ -17,4 +17,9 @@ setup(
     long_description=readme_text,
     install_requires=['colorlog', 'requests', 'six', 'docker', 'jinja2'],
     tests_require=['pytest', 'responses', 'requests-toolbelt'],
+    entry_points={
+        'console_scripts': [
+            'register-runner=gitlab_runner_api:cli.register_runner',
+        ],
+    },
 )

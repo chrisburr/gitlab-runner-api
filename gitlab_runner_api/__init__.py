@@ -5,6 +5,7 @@ from __future__ import print_function
 from . import executors
 from . import failure_reasons
 from . import utils
+from . import cli
 from .exceptions import (AlreadyFinishedExcpetion, APIExcpetion, AuthException,
                          JobCancelledException)
 from .job import Job
@@ -15,6 +16,7 @@ __all__ = [
     'Runner',
     'Job',
 
+    'cli',
     'executors',
     'failure_reasons',
     'utils',
