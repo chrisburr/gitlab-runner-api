@@ -1,0 +1,16 @@
+name: gitlab-runner-api-dev
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python
+  - pip
+  - colorlog
+  - pytest
+  - requests
+  - requests-toolbelt
+  - responses
+  - setuptools_scm
+  - six

@@ -1,0 +1,28 @@
+name: Testing
+
+on: push
+
+jobs:
+  pytest:
+    name: Python ${{ matrix.python-version }} - pytest
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["2.7", "3.7", "3.8", "3.9"]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v1
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          environment-file: etc/example-environment.yml
+      - name: Install
+        shell: bash -l {0}
+        run: |
+          pip install .[testing]
+      - name: Run pytest
+        shell: bash -l {0}
+        run: |
+          pytest -vvv
