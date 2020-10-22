@@ -4,22 +4,13 @@ from __future__ import print_function
 
 __all__ = [
     "ansi",
-    "get_template",
     "Retrier",
 ]
 
 import time
 
-import jinja2
-
 from ..logging import logger
 from . import ansi
-
-
-env = jinja2.Environment(
-    loader=jinja2.PackageLoader("gitlab_runner_api"), undefined=jinja2.StrictUndefined
-)
-get_template = env.get_template
 
 
 class Retrier(object):

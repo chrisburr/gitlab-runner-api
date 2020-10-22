@@ -19,7 +19,7 @@ setup(
     license="LICENSE.txt",
     long_description=readme_text,
     setup_requires=["setuptools_scm"],
-    install_requires=["setuptools", "colorlog", "requests", "six", "jinja2"],
+    install_requires=["setuptools", "colorlog", "requests", "six"],
     tests_require=test_requires,
     extras_require={"testing": test_requires,},
     entry_points={
