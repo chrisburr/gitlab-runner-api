@@ -17,7 +17,6 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     license="MIT",
-    license="LICENSE.txt",
     long_description=readme_text,
     url="https://github.com/chrisburr/gitlab-runner-api/",
     setup_requires=["setuptools_scm"],
