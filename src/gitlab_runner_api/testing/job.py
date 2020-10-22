@@ -7,9 +7,6 @@ import json
 import re
 import string
 
-from requests_toolbelt.multipart import decoder
-import responses
-
 from .utils import check_token, random_string, validate_runner_info
 
 API_ENDPOINT = "https://gitlab.cern.ch/api/v4"
@@ -70,6 +67,8 @@ class Job(object):
         self._api._jobs.append(self)
 
         # Resister additional callbacks
+        import responses
+
         # Update a job's status
         self._api._rsps.add_callback(
             responses.PUT,
@@ -244,6 +243,8 @@ class Job(object):
         self._file_data = data
 
         # Register callback for downloading
+        import responses
+
         self._api._rsps.add_callback(
             responses.GET,
             API_ENDPOINT + "/jobs/" + self.id + "/artifacts",
@@ -274,6 +275,8 @@ class Job(object):
                     {"message": '400 (Bad request) "Already uploaded" not given'}
                 ),
             )
+
+        from requests_toolbelt.multipart import decoder
 
         payload = {}
         for part in decoder.MultipartDecoder(
