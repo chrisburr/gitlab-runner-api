@@ -1,9 +1,0 @@
-{% set change_working_directory = True %}
-{% include 'setup_shell.sh.j2' %}
-
-echo "{{ ansi.BOLD_GREEN }}Running script...{{ ansi.RESET }}"
-{% for line in job.script -%}
-echo "{{ ansi.BOLD_GREEN }}\$ {{ line|replace('"', '\\"') }}{{ ansi.RESET }}"
-{{line}}
-{% endfor %}
-

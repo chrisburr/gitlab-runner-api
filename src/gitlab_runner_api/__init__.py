@@ -2,7 +2,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from . import executors
 from . import failure_reasons
 from . import utils
 from . import cli
@@ -20,7 +19,6 @@ __all__ = [
     "Runner",
     "Job",
     "cli",
-    "executors",
     "failure_reasons",
     "utils",
     "AlreadyFinishedExcpetion",

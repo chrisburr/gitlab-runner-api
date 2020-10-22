@@ -16,7 +16,7 @@ setup(
     package_dir={"": "src"},
     license='LICENSE.txt',
     long_description=readme_text,
-    install_requires=['colorlog', 'requests', 'six', 'docker', 'jinja2'],
+    install_requires=['colorlog', 'requests', 'six', 'jinja2'],
     tests_require=['pytest', 'responses', 'requests-toolbelt'],
     entry_points={
         'console_scripts': [

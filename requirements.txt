@@ -1,5 +1,4 @@
 colorlog
 requests
 six
-docker
 jinja2

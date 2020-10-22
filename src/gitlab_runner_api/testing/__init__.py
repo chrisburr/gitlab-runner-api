@@ -101,9 +101,6 @@ class FakeGitlabAPI(object):
         self._rsps = responses.RequestsMock(assert_all_requests_are_fired=False)
         self._rsps.__enter__()
 
-        # Passthrough any docker related requests
-        self._rsps.add_passthru("http+docker://")
-
         # Register callbacks
         self._rsps.add_callback(
             responses.POST,
