@@ -17,7 +17,7 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-          environment-file: etc/example-environment.yml
+          environment-file: environment.yaml
       - name: Install
         shell: bash -l {0}
         run: |
