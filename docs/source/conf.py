@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = u"gitlab_runner_api"
-copyright = u"2018, gitlab_runner_api developers"
+copyright = u"2018-2020, Chris Burr"
 author = u"gitlab_runner_api developers"
 
 # The short X.Y version
