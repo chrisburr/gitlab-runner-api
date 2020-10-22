@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 with open(join("README.rst"), "rt") as fp:
     readme_text = fp.read()
 
-test_requires = ["pytest", "responses", "requests-toolbelt"]
+test_requires = ["pytest", "pytest-cov", "responses", "requests-toolbelt"]
 
 # Define the package
 setup(
@@ -19,7 +19,7 @@ setup(
     license="LICENSE.txt",
     long_description=readme_text,
     setup_requires=["setuptools_scm"],
-    install_requires=["setuptools", "colorlog", "requests", "six", "flake8-bugbear"],
+    install_requires=["setuptools", "colorlog", "requests", "six"],
     tests_require=test_requires,
     extras_require={"testing": test_requires},
     entry_points={
