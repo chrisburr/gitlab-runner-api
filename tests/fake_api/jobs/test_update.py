@@ -15,10 +15,7 @@ def test_update_log_only(gitlab_api):
     job = gitlab_api.running_jobs[1]
 
     # Update the log text once
-    data = {
-        "token": job.token,
-        "trace": "Initial log text",
-    }
+    data = {"token": job.token, "trace": "Initial log text"}
     response = requests.put(API_ENDPOINT + "/jobs/" + job.id, json=data)
     # Check the response
     assert response.status_code == 200
@@ -26,10 +23,7 @@ def test_update_log_only(gitlab_api):
     gitlab_api.running_jobs[1].log = "Initial log text"
 
     # Update the log text again
-    data = {
-        "token": job.token,
-        "trace": test_log,
-    }
+    data = {"token": job.token, "trace": test_log}
     response = requests.put(API_ENDPOINT + "/jobs/" + job.id, json=data)
     # Check the response
     assert response.status_code == 200
@@ -92,11 +86,7 @@ def test_set_failed(gitlab_api):
 @gitlab_api.use(n_runners=2, n_pending=3, n_running=4)
 def test_invalid_state(gitlab_api):
     expected_job = gitlab_api.running_jobs[1]
-    data = {
-        "token": expected_job.token,
-        "trace": test_log,
-        "state": "invalid_state",
-    }
+    data = {"token": expected_job.token, "trace": test_log, "state": "invalid_state"}
     response = requests.put(API_ENDPOINT + "/jobs/" + expected_job.id, json=data)
     # Check the response
     assert response.status_code == 200
@@ -133,21 +123,14 @@ def test_auth_error(gitlab_api):
     expected_job = gitlab_api.running_jobs[1]
 
     # Request with no token
-    data = {
-        "trace": test_log,
-        "state": "success",
-    }
+    data = {"trace": test_log, "state": "success"}
     response = requests.put(API_ENDPOINT + "/jobs/" + expected_job.id, json=data)
     # Check the response
     assert response.status_code == 400, response.json()
     assert response.json() == {"error": "token is missing"}
 
     # Request with invalid token
-    data = {
-        "token": "invalid_token",
-        "trace": test_log,
-        "state": "success",
-    }
+    data = {"token": "invalid_token", "trace": test_log, "state": "success"}
     response = requests.put(API_ENDPOINT + "/jobs/" + expected_job.id, json=data)
     # Check the response
     assert response.status_code == 403, response.json()
@@ -200,12 +183,7 @@ def test_invalid_failure_reason(gitlab_api):
 @gitlab_api.use(n_runners=2, n_pending=3, n_running=4)
 def test_invalid_info(gitlab_api):
     job = gitlab_api.running_jobs[1]
-    data = {
-        "token": job.token,
-        "trace": test_log,
-        "state": "success",
-        "info": [],
-    }
+    data = {"token": job.token, "trace": test_log, "state": "success", "info": []}
     response = requests.put(API_ENDPOINT + "/jobs/" + job.id, json=data)
     # Check the response
     assert response.status_code == 400

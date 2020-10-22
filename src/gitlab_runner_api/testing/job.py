@@ -14,9 +14,7 @@ from .utils import check_token, random_string, validate_runner_info
 
 API_ENDPOINT = "https://gitlab.cern.ch/api/v4"
 
-__all__ = [
-    "Job",
-]
+__all__ = ["Job"]
 
 
 class JobVariable:
@@ -26,11 +24,7 @@ class JobVariable:
         self.value = value
 
     def as_dict(self):
-        return {
-            "key": self.key,
-            "public": self.public,
-            "value": self.value,
-        }
+        return {"key": self.key, "public": self.public, "value": self.value}
 
 
 class Job(object):
@@ -386,7 +380,7 @@ class Job(object):
                 {
                     "allow_failure": False,
                     "name": "script",
-                    "script": ["pwd", "ls", "env",],
+                    "script": ["pwd", "ls", "env"],
                     "timeout": 3600,
                     "when": "on_success",
                 }

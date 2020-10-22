@@ -135,7 +135,7 @@ latex_documents = [
         u"gl\\_runner\\_api Documentation",
         u"gl\\_runner\\_api developers",
         "manual",
-    ),
+    )
 ]
 
 
@@ -162,7 +162,7 @@ texinfo_documents = [
         "gitlab_runner_api",
         "One line description of project.",
         "Miscellaneous",
-    ),
+    )
 ]
 
 

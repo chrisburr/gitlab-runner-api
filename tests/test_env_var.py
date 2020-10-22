@@ -26,25 +26,14 @@ def test_private():
 
 
 def test_bad_key():
-    bad_values = [
-        "cd /home",
-        "PATH''s",
-        "PYTHONPATH;a",
-    ]
+    bad_values = ["cd /home", "PATH''s", "PYTHONPATH;a"]
     for key in bad_values:
         with pytest.raises(ValueError):
             EnvVar(key, "The value\nsomethig", False)
 
 
 def test_bad_is_public():
-    bad_values = [
-        "true",
-        "false",
-        "True",
-        "false",
-        0,
-        1,
-    ]
+    bad_values = ["true", "false", "True", "false", 0, 1]
     for is_public in bad_values:
         with pytest.raises(ValueError):
             EnvVar("key", "The value\nsomethig", is_public)

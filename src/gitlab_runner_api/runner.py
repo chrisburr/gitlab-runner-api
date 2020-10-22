@@ -81,10 +81,7 @@ class Runner(object):
         """
         if not isinstance(token, six.string_types):
             raise ValueError("token must a string")
-        data = {
-            "token": token,
-            "info": {},
-        }
+        data = {"token": token, "info": {}}
         if description is not None:
             if not isinstance(description, six.string_types):
                 raise ValueError("description must a string")

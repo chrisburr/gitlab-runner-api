@@ -2,9 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-__all__ = [
-    "Job",
-]
+__all__ = ["Job"]
 
 import json
 import re
@@ -187,9 +185,7 @@ class Job(object):
                 )
             )
 
-        data = {
-            "token": self.token,
-        }
+        data = {"token": self.token}
 
         data["trace"] = str(self.log)
 

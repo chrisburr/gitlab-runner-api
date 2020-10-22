@@ -78,13 +78,13 @@ def test_auth_error(gitlab_api):
     expected_job = gitlab_api.running_jobs[1]
 
     headers_to_try = {
-        "No token": {"Content-Range": "0-" + str(len(test_log)),},
+        "No token": {"Content-Range": "0-" + str(len(test_log))},
         "Wrong token": {
             "JOB-TOKEN": "invalid_token",
             "Content-Range": "0-" + str(len(test_log)),
         },
         "No token or content range": {},
-        "Wrong token without content range": {"JOB-TOKEN": "invalid_token",},
+        "Wrong token without content range": {"JOB-TOKEN": "invalid_token"},
     }
     for name, headers in headers_to_try.items():
         response = requests.patch(
@@ -108,9 +108,7 @@ def test_auth_error(gitlab_api):
 def test_range_error(gitlab_api):
     expected_job = gitlab_api.running_jobs[1]
 
-    headers = {
-        "JOB-TOKEN": expected_job.token,
-    }
+    headers = {"JOB-TOKEN": expected_job.token}
     response = requests.patch(
         API_ENDPOINT + "/jobs/" + expected_job.id + "/trace", test_log, headers=headers
     )
@@ -132,7 +130,7 @@ def test_range_error(gitlab_api):
             "JOB-TOKEN": expected_job.token,
             "Content-Range": "0-" + str(len(test_log)) + "-10",
         },
-        "4 Not a number": {"JOB-TOKEN": expected_job.token, "Content-Range": "0-b",},
+        "4 Not a number": {"JOB-TOKEN": expected_job.token, "Content-Range": "0-b"},
     }
     for name, headers in sorted(headers_to_try.items()):
         response = requests.patch(

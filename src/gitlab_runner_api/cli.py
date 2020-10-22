@@ -6,9 +6,7 @@ import argparse
 
 import gitlab_runner_api
 
-__all__ = [
-    "register_runner",
-]
+__all__ = ["register_runner"]
 
 
 def register_runner():

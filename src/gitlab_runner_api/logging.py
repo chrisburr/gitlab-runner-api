@@ -7,9 +7,7 @@ import logging
 import colorlog
 
 
-__all__ = [
-    "logger",
-]
+__all__ = ["logger"]
 
 handler = colorlog.StreamHandler()
 handler.setFormatter(

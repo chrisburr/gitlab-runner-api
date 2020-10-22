@@ -20,12 +20,7 @@ from .utils import (
 
 API_ENDPOINT = "https://gitlab.cern.ch/api/v4"
 
-__all__ = [
-    "API_ENDPOINT",
-    "FakeGitlabAPI",
-    "test_log",
-    "run_test_with_artifact",
-]
+__all__ = ["API_ENDPOINT", "FakeGitlabAPI", "test_log", "run_test_with_artifact"]
 
 if six.PY2:
     getfullargspec = inspect.getargspec
@@ -225,10 +220,7 @@ class FakeGitlabAPI(object):
         token, runner = self.register_runner(**kwargs)
 
         headers = {}
-        response = {
-            "id": runner.id,
-            "token": token,
-        }
+        response = {"id": runner.id, "token": token}
         return (201, headers, json.dumps(response))
 
     def _verify_runner_callback(self, request):

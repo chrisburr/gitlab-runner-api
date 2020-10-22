@@ -21,8 +21,8 @@ setup(
     setup_requires=["setuptools_scm"],
     install_requires=["setuptools", "colorlog", "requests", "six", "flake8-bugbear"],
     tests_require=test_requires,
-    extras_require={"testing": test_requires,},
+    extras_require={"testing": test_requires},
     entry_points={
-        "console_scripts": ["register-runner=gitlab_runner_api:cli.register_runner",],
+        "console_scripts": ["register-runner=gitlab_runner_api:cli.register_runner"]
     },
 )

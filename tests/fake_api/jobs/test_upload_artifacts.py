@@ -87,9 +87,7 @@ def test_set_type_and_format(gitlab_api, artifact_fn, artifact_hash):
     with pytest.raises(NotImplementedError):
         with open(artifact_fn, "rb") as fp:
             headers = {"JOB-TOKEN": job.token}
-            data = {
-                "artifact_type": "1 hour",
-            }
+            data = {"artifact_type": "1 hour"}
             files = {"file": ("artifacts.zip", fp)}
             requests.post(
                 API_ENDPOINT + "/jobs/" + job.id + "/artifacts",
@@ -101,9 +99,7 @@ def test_set_type_and_format(gitlab_api, artifact_fn, artifact_hash):
     with pytest.raises(NotImplementedError):
         with open(artifact_fn, "rb") as fp:
             headers = {"JOB-TOKEN": job.token}
-            data = {
-                "artifact_format": "1 hour",
-            }
+            data = {"artifact_format": "1 hour"}
             files = {"file": ("artifacts.zip", fp)}
             requests.post(
                 API_ENDPOINT + "/jobs/" + job.id + "/artifacts",
@@ -126,14 +122,12 @@ def test_auth_error(gitlab_api, artifact_fn, artifact_hash):
     job = gitlab_api.running_jobs[1]
 
     headers_to_try = {
-        "Wrong token": {"JOB-TOKEN": "invalid_token",},
+        "Wrong token": {"JOB-TOKEN": "invalid_token"},
         "No token or content range": {},
     }
     for name, headers in headers_to_try.items():
         with open(artifact_fn, "rb") as fp:
-            data = {
-                "artifact_format": "1 hour",
-            }
+            data = {"artifact_format": "1 hour"}
             files = {"file": ("artifacts.zip", fp)}
             response = requests.post(
                 API_ENDPOINT + "/jobs/" + job.id + "/artifacts",
