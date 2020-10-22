@@ -94,7 +94,7 @@ A minimal CI executor might run as follows:
        job.log += "\u001b[31mJob failed!!!\u001b[0m\n"
        job.set_failed(failure_reasons.ScriptFailure())
 
-See the reference :class:`gitlab_runner_api.Job` documentation for the full list of available properties.
+See the reference `Job <https://gitlab-runner-api.readthedocs.io/en/latest/job.html#job-api>`_ documentation for the full list of available properties.
 
 Persisting jobs
 ===============
