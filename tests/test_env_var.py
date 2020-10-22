@@ -14,7 +14,6 @@ def test_public():
     assert var.is_public is True
 
     assert var.key in repr(var)
-    assert var.value in repr(var)
 
 
 def test_private():

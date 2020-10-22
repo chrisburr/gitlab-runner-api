@@ -13,6 +13,7 @@ from .exceptions import (
 )
 from .job import Job
 from .runner import Runner
+from .version import package_version
 
 
 __all__ = [
@@ -26,3 +27,5 @@ __all__ = [
     "AuthException",
     "JobCancelledException",
 ]
+
+__version__ = package_version

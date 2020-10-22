@@ -229,7 +229,7 @@ class Job(object):
                 self.id,
                 self.token,
             )
-            if logger.headers["Job-Status"] == "canceled":
+            if response.headers.get("Job-Status") == "canceled":
                 raise JobCancelledException()
             else:
                 raise AuthException()
