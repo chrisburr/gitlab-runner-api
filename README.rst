@@ -20,8 +20,8 @@ gitlab_runner_api
 
 An unofficial Python implementation of the API for creating customised GitLab CI runners.
 
-This package provides the basic functionality for registering a :class:`~gitlab_runner_api.Runner`.
-This object can then be used to request a :class:`~gitlab_runner_api.Job` and communicate the log, status and artifacts back to GitLab.
+This package provides the basic functionality for registering a `Runner <https://gitlab-runner-api.readthedocs.io/en/latest/runner.html#gitlab_runner_api.Runner>`_.
+This object can then be used to request a `Job <https://gitlab-runner-api.readthedocs.io/en/latest/job.html#job-api>`_ and communicate the log, status and artifacts back to GitLab.
 No functionality is provided to execute the payloads defined in the ``.gitlab-ci.yml``.
 
 This package was originally developed to support `LHCb's Analysis Productions <https://gitlab.cern.ch/lhcb-datapkg/AnalysisProductions>`_ by providing a CI runner that could submit jobs to LHCbDIRAC.
@@ -30,7 +30,7 @@ More details can be found in TODO.
 Registering a Runner
 ====================
 
-The simplest way to register a new :class:`~gitlab_runner_api.Runner` is with the included command line tool:
+The simplest way to register a new `Runner <https://gitlab-runner-api.readthedocs.io/en/latest/runner.html#gitlab_runner_api.Runner>`_ is with the included command line tool:
 
 .. code-block::
 
@@ -109,4 +109,4 @@ This can be done using a similar interface to the ``pickle`` module in the Pytho
    from gitlab_runner_api import Job
    job = Job.loads(job_data)
 
-**Note:** The job log is included in the persisted data therefore the :class:`~gitlab_runner_api.Job` object cannot be persisted once and loaded multiple times without loosing the log messages.
+**Note:** The job log is included in the persisted data therefore the `Job <https://gitlab-runner-api.readthedocs.io/en/latest/job.html#job-api>`_ object cannot be persisted once and loaded multiple times without loosing the log messages.
