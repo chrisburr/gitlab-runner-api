@@ -17,6 +17,7 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     license="MIT",
+    description="Unofficial implementation of the GitLab runner client for making customised CI runners",
     long_description=readme_text,
     url="https://github.com/chrisburr/gitlab-runner-api/",
     setup_requires=["setuptools_scm"],
