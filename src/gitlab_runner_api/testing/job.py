@@ -124,9 +124,9 @@ class Job(object):
 
     @status.setter
     def status(self, new_status):
-        started_statuses = ["running", "success", "failed", "skipped", "manual"]
-        active_statuses = ["pending", "running"]
-        completed_statuses = ["success", "failed", "canceled", "skipped"]
+        # started_statuses = ["running", "success", "failed", "skipped", "manual"]
+        # active_statuses = ["pending", "running"]
+        # completed_statuses = ["success", "failed", "canceled", "skipped"]
         ordered_statuses = [
             "failed",
             "pending",

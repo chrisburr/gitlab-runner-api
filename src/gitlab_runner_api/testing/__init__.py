@@ -114,7 +114,7 @@ class FakeGitlabAPI(object):
         )
 
         # Add fake data to the API
-        for i in range(self.n_runners):
+        for _ in range(self.n_runners):
             _, runner = self.register_runner()
 
         for i in range(self.n_pending):
