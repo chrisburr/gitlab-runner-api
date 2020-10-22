@@ -6,7 +6,6 @@ import inspect
 import json
 import string
 
-import responses
 import six
 
 from .job import Job
@@ -92,6 +91,8 @@ class FakeGitlabAPI(object):
         return str(self._next_job_id - 1)
 
     def __enter__(self):
+        import responses
+
         self.do_init()
         self._rsps = responses.RequestsMock(assert_all_requests_are_fired=False)
         self._rsps.__enter__()
