@@ -3,13 +3,13 @@ from __future__ import division
 from __future__ import print_function
 
 __all__ = [
-    'AlreadyFinishedExcpetion',
-    'APIExcpetion',
-    'AuthException',
-    'DockerNotRunningException',
-    'ImagePullException',
-    'JobTimeoutException',
-    'JobCancelledException',
+    "AlreadyFinishedExcpetion",
+    "APIExcpetion",
+    "AuthException",
+    "DockerNotRunningException",
+    "ImagePullException",
+    "JobTimeoutException",
+    "JobCancelledException",
 ]
 
 

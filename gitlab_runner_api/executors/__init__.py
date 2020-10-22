@@ -3,7 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 __all__ = [
-    'DockerExecutor',
+    "DockerExecutor",
 ]
 
 from .docker import DockerExecutor

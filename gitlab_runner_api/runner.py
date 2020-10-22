@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import json
+
 try:
     # Python 3
     from urllib.parse import urlparse
@@ -21,10 +22,24 @@ from .version import CURRENT_DATA_VERSION
 
 class Runner(object):
     @classmethod
-    def register(cls, api_url, token, description=None, active=None, locked=None,
-                 run_untagged=None, tags=None, maximum_timeout=None,
-                 name=None, version=None, revision=None, platform=None,
-                 architecture=None, executor=None, access_level=None):
+    def register(
+        cls,
+        api_url,
+        token,
+        description=None,
+        active=None,
+        locked=None,
+        run_untagged=None,
+        tags=None,
+        maximum_timeout=None,
+        name=None,
+        version=None,
+        revision=None,
+        platform=None,
+        architecture=None,
+        executor=None,
+        access_level=None,
+    ):
         """Register a new runner in GitLab.
 
         Parameters
@@ -65,88 +80,97 @@ class Runner(object):
         :py:class:`Runner <gitlab_runner_api.Runner>`
         """
         if not isinstance(token, six.string_types):
-            raise ValueError('token must a string')
+            raise ValueError("token must a string")
         data = {
-            'token': token,
-            'info': {},
+            "token": token,
+            "info": {},
         }
         if description is not None:
             if not isinstance(description, six.string_types):
-                raise ValueError('description must a string')
-            data['description'] = description
+                raise ValueError("description must a string")
+            data["description"] = description
         if active is not None:
             if not isinstance(active, bool):
-                raise ValueError('active must a bool')
-            data['active'] = active
+                raise ValueError("active must a bool")
+            data["active"] = active
         if locked is not None:
             if not isinstance(locked, bool):
-                raise ValueError('locked must a bool')
-            data['locked'] = locked
+                raise ValueError("locked must a bool")
+            data["locked"] = locked
         if run_untagged is not None:
             if not isinstance(run_untagged, bool):
-                raise ValueError('run_untagged must a bool')
-            data['run_untagged'] = run_untagged
+                raise ValueError("run_untagged must a bool")
+            data["run_untagged"] = run_untagged
         if tags is not None:
             if not isinstance(tags, list):
-                raise ValueError('tags must a list')
-            if not all(isinstance(t, six.string_types) and ',' not in t for t in tags):
+                raise ValueError("tags must a list")
+            if not all(isinstance(t, six.string_types) and "," not in t for t in tags):
                 raise ValueError('tags all not contain ","')
-            data['tag_list'] = ','.join(tags)
+            data["tag_list"] = ",".join(tags)
         if maximum_timeout is not None:
             if not isinstance(maximum_timeout, six.integer_types):
-                raise ValueError('maximum_timeout must an int')
-            data['maximum_timeout'] = maximum_timeout
+                raise ValueError("maximum_timeout must an int")
+            data["maximum_timeout"] = maximum_timeout
         # Add runner info attributes
         if name is not None:
             if not isinstance(name, six.string_types):
-                raise ValueError('name must a string')
-            data['info']['name'] = name
+                raise ValueError("name must a string")
+            data["info"]["name"] = name
         if version is not None:
             if not isinstance(version, six.string_types):
-                raise ValueError('version must a string')
-            data['info']['version'] = version
+                raise ValueError("version must a string")
+            data["info"]["version"] = version
         if revision is not None:
             if not isinstance(revision, six.string_types):
-                raise ValueError('revision must a string')
-            data['info']['revision'] = revision
+                raise ValueError("revision must a string")
+            data["info"]["revision"] = revision
         if platform is not None:
             if not isinstance(platform, six.string_types):
-                raise ValueError('platform must a string')
-            data['info']['platform'] = platform
+                raise ValueError("platform must a string")
+            data["info"]["platform"] = platform
         if architecture is not None:
             if not isinstance(architecture, six.string_types):
-                raise ValueError('architecture must a string')
-            data['info']['architecture'] = architecture
+                raise ValueError("architecture must a string")
+            data["info"]["architecture"] = architecture
         if executor is not None:
             if not isinstance(executor, six.string_types):
-                raise ValueError('executor must a string')
-            data['info']['executor'] = executor
+                raise ValueError("executor must a string")
+            data["info"]["executor"] = executor
         if access_level is not None:
             if not isinstance(access_level, six.string_types):
-                raise ValueError('access_level must a string')
+                raise ValueError("access_level must a string")
             # https://gitlab.com/gitlab-org/gitlab-runner/blob/905d94ee0088ea3d43b987cfe0860614b7e34bbe/commands/register.go#L87-90
-            valid_values = ['not_protected', 'ref_protected']
+            valid_values = ["not_protected", "ref_protected"]
             if access_level not in valid_values:
-                raise ValueError('access_level must be one of %r' % valid_values)
-            data['info']['access_level'] = access_level
+                raise ValueError("access_level must be one of %r" % valid_values)
+            data["info"]["access_level"] = access_level
 
-        request = requests.post(api_url+'/api/v4/runners/', json=data)
+        request = requests.post(api_url + "/api/v4/runners/", json=data)
         if request.status_code == 201:
-            runner_id = int(request.json()['id'])
-            runner_token = request.json()['token']
-            logger.info('%s: Successfully registered runner %d (%s)',
-                        urlparse(request.url).netloc, runner_id, runner_token)
+            runner_id = int(request.json()["id"])
+            runner_token = request.json()["token"]
+            logger.info(
+                "%s: Successfully registered runner %d (%s)",
+                urlparse(request.url).netloc,
+                runner_id,
+                runner_token,
+            )
         elif request.status_code == 403:
-            logger.error('%s: Failed to register runner using token %s',
-                         urlparse(request.url).netloc, token)
+            logger.error(
+                "%s: Failed to register runner using token %s",
+                urlparse(request.url).netloc,
+                token,
+            )
             raise AuthException()
         else:
-            raise NotImplementedError('Unrecognised status code from request', request, request.content)
+            raise NotImplementedError(
+                "Unrecognised status code from request", request, request.content
+            )
 
         # Remove attributes from the request which shouldn't be stored
-        del data['token']
-        if 'active' in data:
-            del data['active']
+        del data["token"]
+        if "active" in data:
+            del data["active"]
 
         return cls(api_url, runner_id, runner_token, data)
 
@@ -163,7 +187,7 @@ class Runner(object):
         -------
         :py:class:`Runner <gitlab_runner_api.Runner>`
         """
-        with open(filename, 'rt') as fp:
+        with open(filename, "rt") as fp:
             return cls.loads(fp.read())
 
     @classmethod
@@ -184,7 +208,7 @@ class Runner(object):
         if version == 1:
             return cls(*data)
         else:
-            raise ValueError('Unrecognised data version: '+str(version))
+            raise ValueError("Unrecognised data version: " + str(version))
 
     def __init__(self, api_url, runner_id, runner_token, data):
         self._api_url = api_url
@@ -194,17 +218,27 @@ class Runner(object):
         self.check_auth()
 
     def check_auth(self):
-        request = requests.post(self.api_url+'/api/v4/runners/verify',
-                                json={'token': self.token})
+        request = requests.post(
+            self.api_url + "/api/v4/runners/verify", json={"token": self.token}
+        )
         if request.status_code == 200:
-            logger.info('%s: Successfully initialised runner %d',
-                        urlparse(request.url).netloc, self.id)
+            logger.info(
+                "%s: Successfully initialised runner %d",
+                urlparse(request.url).netloc,
+                self.id,
+            )
         elif request.status_code == 403:
-            logger.error('%s: Failed to authenticate runner %d with token %s',
-                         urlparse(request.url).netloc, self.id, self.token)
+            logger.error(
+                "%s: Failed to authenticate runner %d with token %s",
+                urlparse(request.url).netloc,
+                self.id,
+                self.token,
+            )
             raise AuthException()
         else:
-            raise NotImplementedError('Unrecognised status code from request', request, request.content)
+            raise NotImplementedError(
+                "Unrecognised status code from request", request, request.content
+            )
 
     def dump(self, filename):
         """Serialise this runner as a file which can be loaded with `Runner.load`
@@ -214,7 +248,7 @@ class Runner(object):
         filename : :obj:`str`
             Registration token
         """
-        with open(filename, 'wt') as fp:
+        with open(filename, "wt") as fp:
             fp.write(self.dumps())
 
     def dumps(self):
@@ -226,7 +260,9 @@ class Runner(object):
             String representation of the job that can be loaded with
             `Runner.loads`
         """
-        return json.dumps([CURRENT_DATA_VERSION, self.api_url, self.id, self.token, self._data])
+        return json.dumps(
+            [CURRENT_DATA_VERSION, self.api_url, self.id, self.token, self._data]
+        )
 
     def request_job(self):
         """Request a new job to run.
@@ -235,40 +271,57 @@ class Runner(object):
         -------
         :py:class:`Job <gitlab_runner_api.Job>` or None
         """
-        request = requests.post(self.api_url+'/api/v4/jobs/request',
-                                json={'token': self.token, 'info': self._info})
+        request = requests.post(
+            self.api_url + "/api/v4/jobs/request",
+            json={"token": self.token, "info": self._info},
+        )
         if request.status_code == 201:
             job = Job(self, request.json())
-            logger.info('%s: Got a job %s for runner %d',
-                        urlparse(request.url).netloc, job.job_url, self.id)
+            logger.info(
+                "%s: Got a job %s for runner %d",
+                urlparse(request.url).netloc,
+                job.job_url,
+                self.id,
+            )
             return job
         elif request.status_code == 204:
-            logger.info('%s: No jobs available %d with token %s',
-                        urlparse(request.url).netloc, self.id, self.token)
+            logger.info(
+                "%s: No jobs available %d with token %s",
+                urlparse(request.url).netloc,
+                self.id,
+                self.token,
+            )
             return None
         elif request.status_code == 403:
-            logger.error('%s: Failed to authenticate runner %d with token %s',
-                         urlparse(request.url).netloc, self.id, self.token)
+            logger.error(
+                "%s: Failed to authenticate runner %d with token %s",
+                urlparse(request.url).netloc,
+                self.id,
+                self.token,
+            )
             raise AuthException()
         elif request.status_code == 409:
-            logger.error('%s: Received 409 conflict for runner %d with token %s',
-                         urlparse(request.url).netloc, self.id, self.token)
+            logger.error(
+                "%s: Received 409 conflict for runner %d with token %s",
+                urlparse(request.url).netloc,
+                self.id,
+                self.token,
+            )
             return None
         else:
-            raise NotImplementedError('Unrecognised status code from request',
-                                      request, request.content)
+            raise NotImplementedError(
+                "Unrecognised status code from request", request, request.content
+            )
 
     def __repr__(self):
-        return 'Runner(id={id}, token={token})'.format(
-            id=self.id, token=self.token
-        )
+        return "Runner(id={id}, token={token})".format(id=self.id, token=self.token)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
     @property
     def _info(self):
-        return self._data['info']
+        return self._data["info"]
 
     @property
     def api_url(self):
@@ -284,70 +337,70 @@ class Runner(object):
 
     @property
     def name(self):
-        if 'name' not in self._info:
+        if "name" not in self._info:
             return None
-        return self._info['name']
+        return self._info["name"]
 
     @property
     def description(self):
-        if 'description' not in self._data:
+        if "description" not in self._data:
             return None
-        return self._data['description']
+        return self._data["description"]
 
     @property
     def active(self):
-        raise NotImplementedError('This should probably be taken from the main API')
+        raise NotImplementedError("This should probably be taken from the main API")
 
     @property
     def locked(self):
-        if 'locked' not in self._data:
+        if "locked" not in self._data:
             return None
-        return self._data['locked']
+        return self._data["locked"]
 
     @property
     def run_untagged(self):
-        if 'run_untagged' not in self._data:
+        if "run_untagged" not in self._data:
             return None
-        return self._data['run_untagged']
+        return self._data["run_untagged"]
 
     @property
     def tags(self):
-        if 'tag_list' not in self._data:
+        if "tag_list" not in self._data:
             return []
-        return set(self._data['tag_list'].split(','))
+        return set(self._data["tag_list"].split(","))
 
     @property
     def maximum_timeout(self):
-        if 'maximum_timeout' not in self._data:
+        if "maximum_timeout" not in self._data:
             return None
-        return self._data['maximum_timeout']
+        return self._data["maximum_timeout"]
 
     @property
     def version(self):
-        if 'version' not in self._info:
+        if "version" not in self._info:
             return None
-        return self._info['version']
+        return self._info["version"]
 
     @property
     def revision(self):
-        if 'revision' not in self._info:
+        if "revision" not in self._info:
             return None
-        return self._info['revision']
+        return self._info["revision"]
 
     @property
     def platform(self):
-        if 'platform' not in self._info:
+        if "platform" not in self._info:
             return None
-        return self._info['platform']
+        return self._info["platform"]
 
     @property
     def architecture(self):
-        if 'architecture' not in self._info:
+        if "architecture" not in self._info:
             return None
-        return self._info['architecture']
+        return self._info["architecture"]
 
     @property
     def executor(self):
-        if 'executor' not in self._info:
+        if "executor" not in self._info:
             return None
-        return self._info['executor']
+        return self._info["executor"]

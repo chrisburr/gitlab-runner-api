@@ -7,8 +7,9 @@ import argparse
 import gitlab_runner_api
 
 __all__ = [
-    'register_runner',
+    "register_runner",
 ]
+
 
 def register_runner():
     parser = argparse.ArgumentParser()
@@ -18,11 +19,12 @@ def register_runner():
     parser.add_argument(
         "--locked",
         action="store_true",
-        help="Lock the runner the to the current project")
+        help="Lock the runner the to the current project",
+    )
     parser.add_argument(
         "--maximum-timeout",
         type=int,
-        help="Maximum timeout set when this Runner will handle the job (in seconds)"
+        help="Maximum timeout set when this Runner will handle the job (in seconds)",
     )
     args = parser.parse_args()
 

@@ -14,17 +14,24 @@ gitlab_api = FakeGitlabAPI()
 def test_valid_body(gitlab_api):
     job = gitlab_api.completed_jobs[0]
 
-    response = requests.get(API_ENDPOINT+'/jobs/'+job.id+'/artifacts', data={'token': job.token})
+    response = requests.get(
+        API_ENDPOINT + "/jobs/" + job.id + "/artifacts", data={"token": job.token}
+    )
     # Check the response
     assert response.status_code == 200
     assert response.content == job.file_data
 
-    response = requests.get(API_ENDPOINT+'/jobs/'+job.id+'/artifacts', params={'token': job.token})
+    response = requests.get(
+        API_ENDPOINT + "/jobs/" + job.id + "/artifacts", params={"token": job.token}
+    )
     # Check the response
     assert response.status_code == 200
     assert response.content == job.file_data
 
-    response = requests.get(API_ENDPOINT+'/jobs/'+job.id+'/artifacts', headers={'JOB-TOKEN': job.token})
+    response = requests.get(
+        API_ENDPOINT + "/jobs/" + job.id + "/artifacts",
+        headers={"JOB-TOKEN": job.token},
+    )
     # Check the response
     assert response.status_code == 200
     assert response.content == job.file_data
@@ -39,30 +46,40 @@ def test_valid_body(gitlab_api):
 def test_auth_error(gitlab_api):
     job = gitlab_api.completed_jobs[0]
 
-    headers = {'JOB-TOKEN': job.token}
-    params = {'token': job.token}
+    headers = {"JOB-TOKEN": job.token}
+    params = {"token": job.token}
 
-    response = requests.get(API_ENDPOINT+'/jobs/'+job.id+'/artifacts',
-                            data={'token': 'invalid_token'}, params=params, headers=headers)
+    response = requests.get(
+        API_ENDPOINT + "/jobs/" + job.id + "/artifacts",
+        data={"token": "invalid_token"},
+        params=params,
+        headers=headers,
+    )
     # Check the response
     assert response.status_code == 403
-    assert response.json() == {'message': '403 Forbidden'}
+    assert response.json() == {"message": "403 Forbidden"}
 
-    response = requests.get(API_ENDPOINT+'/jobs/'+job.id+'/artifacts',
-                            params={'token': 'invalid_token'}, headers=headers)
+    response = requests.get(
+        API_ENDPOINT + "/jobs/" + job.id + "/artifacts",
+        params={"token": "invalid_token"},
+        headers=headers,
+    )
     # Check the response
     assert response.status_code == 403
-    assert response.json() == {'message': '403 Forbidden'}
+    assert response.json() == {"message": "403 Forbidden"}
 
-    response = requests.get(API_ENDPOINT+'/jobs/'+job.id+'/artifacts', headers={'JOB-TOKEN': 'invalid_token'})
+    response = requests.get(
+        API_ENDPOINT + "/jobs/" + job.id + "/artifacts",
+        headers={"JOB-TOKEN": "invalid_token"},
+    )
     # Check the response
     assert response.status_code == 403
-    assert response.json() == {'message': '403 Forbidden'}
+    assert response.json() == {"message": "403 Forbidden"}
 
-    response = requests.get(API_ENDPOINT+'/jobs/'+job.id+'/artifacts')
+    response = requests.get(API_ENDPOINT + "/jobs/" + job.id + "/artifacts")
     # Check the response
     assert response.status_code == 403
-    assert response.json() == {'message': '403 Forbidden'}
+    assert response.json() == {"message": "403 Forbidden"}
 
     # Check the API's internal state
     assert len(gitlab_api.pending_jobs) == 3

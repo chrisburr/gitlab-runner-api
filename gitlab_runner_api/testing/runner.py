@@ -3,7 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 __all__ = [
-    'Runner',
+    "Runner",
 ]
 
 
@@ -13,10 +13,21 @@ class Runner(object):
         self._jobs = {}
         self.update(**kwargs)
 
-    def update(self, description=None, active=None, locked=None,
-               run_untagged=None, tag_list=None, maximum_timeout=None,
-               name=None, version=None, revision=None, platform=None,
-               architecture=None, executor=None):
+    def update(
+        self,
+        description=None,
+        active=None,
+        locked=None,
+        run_untagged=None,
+        tag_list=None,
+        maximum_timeout=None,
+        name=None,
+        version=None,
+        revision=None,
+        platform=None,
+        architecture=None,
+        executor=None,
+    ):
         self._description = description
         self._active = active
         self._locked = locked

@@ -3,9 +3,9 @@ from __future__ import division
 from __future__ import print_function
 
 __all__ = [
-    'ansi',
-    'get_template',
-    'Retrier',
+    "ansi",
+    "get_template",
+    "Retrier",
 ]
 
 import time
@@ -17,8 +17,7 @@ from . import ansi
 
 
 env = jinja2.Environment(
-    loader=jinja2.PackageLoader('gitlab_runner_api'),
-    undefined=jinja2.StrictUndefined
+    loader=jinja2.PackageLoader("gitlab_runner_api"), undefined=jinja2.StrictUndefined
 )
 get_template = env.get_template
 
@@ -32,13 +31,17 @@ class Retrier(object):
         self._wait_seconds = wait_seconds
 
     def __call__(self, *args, **kwargs):
-        for i in range(1, self._n_retries+1):
+        for i in range(1, self._n_retries + 1):
             try:
                 return self._func(*args, **kwargs)
             except self._to_catch as e:
                 logger.warning(
-                    'Caught error running %s on retry %d of %d, waiting %d seconds. %r',
-                    self._func.__name__, i, self._n_retries, self._wait_seconds, e
+                    "Caught error running %s on retry %d of %d, waiting %d seconds. %r",
+                    self._func.__name__,
+                    i,
+                    self._n_retries,
+                    self._wait_seconds,
+                    e,
                 )
                 time.sleep(self._wait_seconds)
         raise self._to_raise
