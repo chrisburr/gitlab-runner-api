@@ -14,7 +14,7 @@ gitlab_runner_api
    :target: https://pypi.org/project/gitlab-runner-api/
    :alt: PyPI Package
 
-.. image:: https://img.shields.io/conda/vn/conda-forge/gitlab-runner-api/
+.. image:: https://img.shields.io/conda/vn/conda-forge/gitlab-runner-api.svg
    :target: https://github.com/conda-forge/gitlab-runner-api-feedstock/
    :alt: Conda-forge Package
 
