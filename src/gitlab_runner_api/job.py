@@ -187,8 +187,6 @@ class Job(object):
 
         data = {"token": self.token}
 
-        data["trace"] = str(self.log)
-
         if state is not None:
             data["state"] = state
 
@@ -474,7 +472,7 @@ class JobLog(object):
                 len(other),
                 self._job.id,
             )
-            self._remote_length += len(other)
+            self._remote_length = int(response.headers["Range"].split("-")[-1])
         elif response.status_code == 403:
             logger.error(
                 "%s: Failed to authenticate job %d with token %s",
@@ -489,13 +487,13 @@ class JobLog(object):
         elif response.status_code == 416:
             logger.warning(
                 "%s: Failed to patch Job %d's log with %s due to "
-                "invalid content range, resetting...",
+                "invalid content range, remote content range is %s",
                 urlparse(response.url).netloc,
                 self._job.id,
                 headers,
+                response.headers["Range"],
             )
-            self._job._update_state()
-            self._remote_length = len(self._log)
+            self._remote_length = int(response.headers["Range"].split("-")[-1])
         else:
             logger.warning(
                 "%s: Failed apply log patch to Job %d for unknown"
