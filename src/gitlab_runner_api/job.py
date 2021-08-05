@@ -25,7 +25,7 @@ from .version import CURRENT_DATA_VERSION, package_version
 
 class Job(object):
     @classmethod
-    def load(cls, filename):
+    def load(cls, filename, do_auth=True):
         """Serialise this job as a file which can be loaded with `Job.load`.
 
         Parameters
@@ -41,13 +41,15 @@ class Job(object):
             return cls.loads(fp.read())
 
     @classmethod
-    def loads(cls, data):
+    def loads(cls, data, do_auth=True):
         """Serialise this job as a file which can be loaded with `Job.load`.
 
         Parameters
         ----------
         data : :obj:`str`
             String representing the job to initialise
+        do_auth : :obj:`bool`
+            Validate the runner credentials
 
         Returns
         -------
@@ -60,7 +62,7 @@ class Job(object):
 
             runner_info, job_info, state, log = data
             return cls(
-                Runner.loads(runner_info),
+                Runner.loads(runner_info, do_auth=do_auth),
                 job_info,
                 fail_on_error=False,
                 state=state,
