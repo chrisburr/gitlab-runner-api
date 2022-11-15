@@ -172,29 +172,33 @@ class Runner(object):
         return cls(api_url, runner_id, runner_token, data)
 
     @classmethod
-    def load(cls, filename):
+    def load(cls, filename, do_auth=True):
         """Serialise this runner as a file which can be loaded with `Runner.load`.
 
         Parameters
         ----------
         filename : :obj:`str`
-            Path to file that represents the runner to initialise.
+            Path to file that represents the runner to initialise
+        do_auth : :obj:`bool`
+            Validate the runner credentials
 
         Returns
         -------
         :py:class:`Runner <gitlab_runner_api.Runner>`
         """
         with open(filename, "rt") as fp:
-            return cls.loads(fp.read())
+            return cls.loads(fp.read(), do_auth=do_auth)
 
     @classmethod
-    def loads(cls, data):
+    def loads(cls, data, do_auth=True):
         """Serialise this runner as a file which can be loaded with `Runner.load`.
 
         Parameters
         ----------
         data : :obj:`str`
             String representing the runner to initialise
+        do_auth : :obj:`bool`
+            Validate the runner credentials
 
         Returns
         -------
@@ -203,16 +207,17 @@ class Runner(object):
         data = json.loads(data)
         version, data = data[0], data[1:]
         if version == 1:
-            return cls(*data)
+            return cls(*data, do_auth=do_auth)
         else:
             raise ValueError("Unrecognised data version: " + str(version))
 
-    def __init__(self, api_url, runner_id, runner_token, data):
+    def __init__(self, api_url, runner_id, runner_token, data, do_auth=True):
         self._api_url = api_url
         self._id = runner_id
         self._token = runner_token
         self._data = data
-        self.check_auth()
+        if do_auth:
+            self.check_auth()
 
     def check_auth(self):
         request = requests.post(

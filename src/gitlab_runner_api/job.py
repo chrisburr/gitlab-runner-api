@@ -25,7 +25,7 @@ from .version import CURRENT_DATA_VERSION, package_version
 
 class Job(object):
     @classmethod
-    def load(cls, filename):
+    def load(cls, filename, do_auth=True):
         """Serialise this job as a file which can be loaded with `Job.load`.
 
         Parameters
@@ -41,13 +41,15 @@ class Job(object):
             return cls.loads(fp.read())
 
     @classmethod
-    def loads(cls, data):
+    def loads(cls, data, do_auth=True):
         """Serialise this job as a file which can be loaded with `Job.load`.
 
         Parameters
         ----------
         data : :obj:`str`
             String representing the job to initialise
+        do_auth : :obj:`bool`
+            Validate the runner credentials
 
         Returns
         -------
@@ -60,7 +62,7 @@ class Job(object):
 
             runner_info, job_info, state, log = data
             return cls(
-                Runner.loads(runner_info),
+                Runner.loads(runner_info, do_auth=do_auth),
                 job_info,
                 fail_on_error=False,
                 state=state,
@@ -99,12 +101,6 @@ class Job(object):
 
         self._variables = {}
         for var_info in self._job_info["variables"]:
-            logger.debug(
-                "%s: Parsing environment variable from job %d (%s)",
-                urlparse(self._runner.api_url).netloc,
-                self.id,
-                repr(var_info),
-            )
             var = EnvVar(**var_info)
             self._variables[var.key] = var
 
@@ -186,8 +182,6 @@ class Job(object):
             )
 
         data = {"token": self.token}
-
-        data["trace"] = str(self.log)
 
         if state is not None:
             data["state"] = state
@@ -474,7 +468,7 @@ class JobLog(object):
                 len(other),
                 self._job.id,
             )
-            self._remote_length += len(other)
+            self._remote_length = int(response.headers["Range"].split("-")[-1])
         elif response.status_code == 403:
             logger.error(
                 "%s: Failed to authenticate job %d with token %s",
@@ -489,13 +483,13 @@ class JobLog(object):
         elif response.status_code == 416:
             logger.warning(
                 "%s: Failed to patch Job %d's log with %s due to "
-                "invalid content range, resetting...",
+                "invalid content range, remote content range is %s",
                 urlparse(response.url).netloc,
                 self._job.id,
                 headers,
+                response.headers["Range"],
             )
-            self._job._update_state()
-            self._remote_length = len(self._log)
+            self._remote_length = int(response.headers["Range"].split("-")[-1])
         else:
             logger.warning(
                 "%s: Failed apply log patch to Job %d for unknown"
