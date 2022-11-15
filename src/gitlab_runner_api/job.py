@@ -101,12 +101,6 @@ class Job(object):
 
         self._variables = {}
         for var_info in self._job_info["variables"]:
-            logger.debug(
-                "%s: Parsing environment variable from job %d (%s)",
-                urlparse(self._runner.api_url).netloc,
-                self.id,
-                repr(var_info),
-            )
             var = EnvVar(**var_info)
             self._variables[var.key] = var
 
